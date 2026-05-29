@@ -63,10 +63,9 @@ stats   = { streak, lastActive, todayDate, todayCount, ideasRealized }
 
 ## Röst (speech-to-text)
 
-- Web Speech API (`window.SpeechRecognition` / `webkitSpeechRecognition`), språk `sv-SE`.
-- `continuous = true` + auto-omstart i `onend` tills användaren släpper (push-to-talk via pointer-events).
-- Engångs-aktivering via `getUserMedia` (håller strömmen vid liv) för att slippa upprepade tillståndsrutor.
-- **Kräver https.** På `file://` glömmer/blockerar webbläsaren mikrofontillstånd; på mobil blockeras det ofta helt. Därför körs appen på GitHub Pages.
+- **Röst sker via enhetens egna tangentbords-diktering** (t.ex. Gboard-mic), inte via en egen knapp i appen. Alla textfält (fångst + inmatnings-sheet) autofokuseras så tangentbordets mic är redo direkt.
+- **Web Speech API (`webkitSpeechRecognition`) är borttaget (2026-05-29, v1.3).** Det transkriberade inte på ägarens telefon och låste mikrofonen tills Chrome stängdes. Lägg **inte** tillbaka det. En egen mic-knapp som funkar på mobil skulle kräva en moln-baserad tal-till-text-tjänst (backend → arkitektur-tripwiren).
+- Appen körs på https (GitHub Pages) — krävs ändå för tangentbordets diktering och PWA.
 
 ## Design
 
@@ -91,7 +90,7 @@ GitHub Pages från `main` / root. Live-URL: `https://<användarnamn>.github.io/<
 
 1. ~~**Riktig PWA**: `manifest.json` + service worker → installerbar, fungerar offline.~~ ✅ **KLAR 2026-05-29** — manifest, `sw.js`, PNG/maskable-ikoner, self-hostade typsnitt, iOS-hint, `storage.persist()`, namnbyte "Nu." → **ToDoNu**. Kvarstående risk: iOS kan ändå vakuumera `localStorage` efter ~7 dagars inaktivitet (riktig lösning = IndexedDB/synk).
 2. **Morgonnotis**: Notifications API via service worker. OBS: på iOS krävs installerad PWA och web push är begränsat — undersök lösning.
-3. **Bryt ut röst-till-text** som en återanvändbar modul (ägaren vill kunna testa den i andra projekt).
+3. ~~**Bryt ut röst-till-text** som återanvändbar modul.~~ **Överspelad 2026-05-29:** in-app Web Speech togs bort (fungerade ej på ägarens telefon). Röst sker nu via tangentbordets diktering. En egen återanvändbar röst-modul kräver moln-STT (backend) om den ska funka på mobil.
 4. **Arkitekturbeslut** — *avgjort 2026-05-29: behåll vanilla nu + tripwire.* Migrera till **Vite-SPA** (ej full Next.js) först när någon tröskel slår till: (a) synk/flera enheter, (b) UI > ~3–4 vyer med delat interaktivt tillstånd, (c) upprepad kamp mot vanilla-renderingen. Tills dess: lös den enda svagheten (full `innerHTML`-omritning) med riktade DOM-uppdateringar, och bryt ut röst-modulen (punkt 3).
 5. **Synk mellan enheter** (idag är allt lokalt per enhet).
 6. ~~**Deluppgifter (checklista)**~~ ✅ **KLAR 2026-05-29** — frivillig checklista på uppgifter, alltid synlig, "＋ steg"-knapp, tyst avbockning via riktad DOM-uppdatering. Delsteg frikopplade från uppgiftens klar-status (ingen auto-klar). Redigerbara titlar via klick.
