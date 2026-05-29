@@ -73,17 +73,10 @@ body{background:var(--bg);color:var(--ink);font-family:'Space Mono',monospace;mi
 .burst i{position:absolute;top:50%;left:50%;width:5px;height:5px;border-radius:50%;background:var(--amber);transform:translate(-50%,-50%);animation:spark var(--d) ease-out forwards}
 .burst i.big{background:var(--ember);box-shadow:0 0 6px var(--ember)}
 @keyframes spark{0%{opacity:1;transform:translate(-50%,-50%) rotate(var(--a)) translateY(0) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) rotate(var(--a)) translateY(-28px) scale(.3)}}
-.cap{display:flex;flex-direction:column;align-items:center;padding-top:30px}
-.mic{position:relative;width:104px;height:104px;border-radius:50%;border:none;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none;background:radial-gradient(circle at 30% 30%,#2c241e,#16110e);color:var(--ink);display:flex;align-items:center;justify-content:center;box-shadow:0 14px 40px -12px rgba(0,0,0,.8),inset 0 0 0 1px var(--line);transition:.2s}
-.mic svg{width:30px;height:30px}
-.mic.live{background:radial-gradient(circle at 30% 30%,#ff8a5c,var(--ember));color:#13100e;box-shadow:0 14px 50px -8px rgba(255,107,53,.6)}
-.mic .ring{position:absolute;inset:0;border-radius:50%;border:2px solid var(--ember);opacity:0}
-.mic.live .r1{animation:pulse 1.8s ease-out infinite}.mic.live .r2{animation:pulse 1.8s ease-out infinite .9s}
-@keyframes pulse{0%{opacity:.6;transform:scale(1)}100%{opacity:0;transform:scale(1.7)}}
-.status{margin:18px 0 4px;color:var(--soft);font-size:13px;text-align:center}
+.cap{display:flex;flex-direction:column;align-items:center;padding-top:40px}
+.status{margin:0 0 4px;color:var(--soft);font-size:13px;text-align:center}
 .field{width:100%;max-width:420px;margin-top:14px;background:none;border:none;border-bottom:2px solid var(--line);outline:none;font-family:'Fraunces',serif;font-size:22px;color:var(--ink);padding:8px 2px;text-align:center}
 .field:focus{border-color:var(--ember)}.field::placeholder{color:var(--faint);font-style:italic}
-.warn{margin-top:12px;color:var(--amber);font-size:12px;text-align:center;line-height:1.5}
 .extra{width:100%;max-width:420px;margin-top:26px;animation:fade .2s}
 .crow{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
 .clbl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);width:100%;margin-bottom:2px}
@@ -112,18 +105,15 @@ body{background:var(--bg);color:var(--ink);font-family:'Space Mono',monospace;mi
 <div id="app"></div>
 <script>
 const KEY="nu-projekt-v1";
-const VER="1.2";
+const VER="1.3";
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const isoD=d=>d.toISOString().slice(0,10);
 const today=()=>isoD(new Date());
 const yest=()=>{const d=new Date();d.setDate(d.getDate()-1);return isoD(d)};
-const Recog=window.SpeechRecognition||window.webkitSpeechRecognition;
-const MIC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v4"/></svg>';
-const STOP='<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
 
 let s={projects:[],items:[],stats:{streak:0,lastActive:"",todayDate:"",todayCount:0,ideasRealized:0},view:"list",cur:null};
-let cap={draft:"",dest:"inbox",kind:"task",listening:false,err:"",micReady:false};
-let rec=null,micStream=null,audio=null;
+let cap={draft:"",dest:"inbox",kind:"task"};
+let audio=null;
 
 function seedIfEmpty(){
   s.projects=[{id:"p_studie",name:"StudiePlan",createdAt:Date.now()}];
@@ -162,14 +152,8 @@ function openSheet(title,initial,onConfirm){closeSheet();sheet={onConfirm};const
 function confirmSheet(){const inp=document.getElementById("sheetfield");if(!inp)return;const v=inp.value.trim();const cb=sheet&&sheet.onConfirm;closeSheet();if(v&&cb)cb(v)}
 function closeSheet(){const bg=document.getElementById("sheetbg");if(bg)bg.remove();const el=document.getElementById("sheet");if(el)el.remove();sheet=null}
 function removeProject(id){s.projects=s.projects.filter(p=>p.id!==id);s.items.forEach(x=>{if(x.projectId===id)x.projectId=null});s.view="list";save();render()}
-function go(v){s.view=v;if(v==="capture"){cap.draft="";cap.err="";render();setTimeout(()=>{const f=document.getElementById("field");if(f)try{f.focus()}catch(e){}},60);return}render()}
+function go(v){s.view=v;if(v==="capture"){cap.draft="";render();setTimeout(()=>{const f=document.getElementById("field");if(f)try{f.focus()}catch(e){}},60);return}render()}
 function openProj(id){s.cur=id;s.view="detail";render()}
-
-async function enableMic(){if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){cap.err="nosupport";render();return}try{micStream=await navigator.mediaDevices.getUserMedia({audio:true});cap.micReady=true;cap.err="";render()}catch(e){cap.err="denied";render()}}
-function startListen(){if(!Recog){cap.err="nosupport";render();return}try{rec=new Recog();rec.lang="sv-SE";rec.interimResults=true;rec.continuous=true;let fin="";rec.onresult=e=>{let int="";for(let i=e.resultIndex;i<e.results.length;i++){const tr=e.results[i][0].transcript;if(e.results[i].isFinal)fin+=tr+" ";else int+=tr}cap.draft=(fin+int).replace(/\s+/g," ").trim();const f=document.getElementById("field");if(f)f.value=cap.draft;toggleExtra()};rec.onerror=e=>{if(e.error==="not-allowed"||e.error==="service-not-allowed"){cap.err="denied";rec.want=false;cap.listening=false;render()}};rec.onend=()=>{if(rec.want){try{rec.start();return}catch(e){}}cap.listening=false;render()};rec.want=true;cap.err="";cap.listening=true;render();rec.start()}catch(e){cap.err="denied";render()}}
-function stopListen(){if(rec)rec.want=false;try{rec&&rec.stop()}catch(e){}cap.listening=false;render()}
-function holdStart(e){e.preventDefault();if(!cap.listening)startListen()}
-function holdEnd(e){e.preventDefault();if(cap.listening)stopListen()}
 
 function toggleExtra(){const el=document.getElementById("extra");if(el)el.style.display=cap.draft.trim()?"":"none"}
 function greeting(){const h=new Date().getHours();return h<10?"God morgon":h<18?"Hej":"God kväll"}
@@ -215,11 +199,8 @@ function render(){
 
   if(s.view==="capture"){
     h+='<div class="body cap">';
-    if(!cap.micReady){h+='<button class="mic" onclick="enableMic()">'+MIC+'</button><p class="status">Tryck för att aktivera mikrofonen</p>'}
-    else{h+='<button class="mic '+(cap.listening?"live":"")+'" onpointerdown="holdStart(event)" onpointerup="holdEnd(event)" onpointerleave="holdEnd(event)" onpointercancel="holdEnd(event)" oncontextmenu="return false">'+(cap.listening?STOP:MIC)+(cap.listening?'<span class="ring r1"></span><span class="ring r2"></span>':'')+'</button><p class="status">'+(cap.listening?"Lyssnar… släpp när du är klar":"Håll inne och prata — eller skriv nedan")+'</p>'}
+    h+='<p class="status">Skriv eller diktera med tangentbordets mic</p>';
     h+='<input id="field" class="field" placeholder="Vad tänker du på?" value="'+esc(cap.draft)+'" oninput="cap.draft=this.value;toggleExtra()" onkeydown="if(event.key===\'Enter\')addItem()">';
-    if(cap.err==="denied")h+='<p class="warn">Mikrofonen blockerades. Tillåt mikrofon i webbläsaren och försök igen, eller skriv i fältet.</p>';
-    if(cap.err==="nosupport")h+='<p class="warn">Röst stöds inte i den här webbläsaren — skriv i fältet istället.</p>';
     h+='<div id="extra" class="extra" style="'+(cap.draft.trim()?"":"display:none")+'"><div class="crow"><span class="clbl">Det här är en</span><button class="pill '+(cap.kind==="task"?"on":"")+'" onclick="cap.kind=\'task\';render()">▸ Uppgift</button><button class="pill '+(cap.kind==="idea"?"on":"")+'" onclick="cap.kind=\'idea\';render()">💡 Idé</button></div>';
     h+='<div class="crow"><span class="clbl">Lägg i</span><button class="pill '+(cap.dest==="inbox"?"on":"")+'" onclick="cap.dest=\'inbox\';render()">📥 Inkorg</button>';
     s.projects.forEach(p=>{h+='<button class="pill '+(cap.dest===p.id?"on":"")+'" onclick="cap.dest=\''+p.id+'\';render()">'+esc(p.name)+'</button>'});
