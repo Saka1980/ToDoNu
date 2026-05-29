@@ -4,6 +4,22 @@ Kronologisk logg över vad vi byggt och *varför*. Nyaste överst när nya rader
 
 ---
 
+## 2026-05-29 — Tredje sessionen (git + GitHub Pages live)
+
+Avblockerade förra sessionens hängande punkt: **git/GitHub är uppsatt och appen är live.**
+
+- `git init` + första commit (CLAUDE.md, LOG.md, index.html), gren `main`.
+- Kopplat till remote: **https://github.com/Saka1980/ToDoNu**.
+- **GitHub Pages aktiverat** (Deploy from branch, `main`/root) av ägaren manuellt.
+- Live-URL verifierad (HTTP 200, serverar `index.html`): **https://saka1980.github.io/ToDoNu/** — nu körs appen på **https**, så röst-mikrofonen funkar på mobil.
+- La till `.gitignore` för Windows (skräpfiler, editor-filer, `.env`).
+- Sidospår: testade en Actions-baserad Pages-deploy men tog bort den igen — branch-deploy räcker för en statisk fil.
+
+### Kvar / nästa steg
+Plattformen står klar. Nästa kodfeature enligt roadmap är **PWA (punkt 1)** — `manifest.json` + service worker (`sw.js`), self-hostade typsnitt, genererade ikoner, namnbyte "Nu." → **ToDoNu**. Detaljplan finns i posten nedan (andra sessionen).
+
+---
+
 ## 2026-05-29 — Andra sessionen (planering: PWA, deluppgifter, arkitektur)
 
 Ren planeringssession — **inga kodändringar**. Tre beslut fattade och dokumenterade.
