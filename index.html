@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>Nu.</title>
+<meta name="theme-color" content="#13100e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Nu">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%2313100e'/%3E%3Ccircle cx='90' cy='90' r='30' fill='%23ff6b35'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#13100e;--bg2:#1e1916;--card:#211b17;--ink:#f4ede0;--soft:#a89c87;--faint:#5e554a;--line:#2e2823;--ember:#ff6b35;--amber:#f0a830;--idea:#7db4c4;--green:#7fa88f}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font-family:'Space Mono',monospace;min-height:100vh}
+#app{max-width:620px;margin:0 auto;min-height:100vh;position:relative;overflow:hidden;padding-bottom:96px;background-image:radial-gradient(circle at 50% -8%,rgba(255,107,53,.12),transparent 55%)}
+.top{display:flex;align-items:center;justify-content:space-between;padding:max(20px,env(safe-area-inset-top)) 22px 10px}
+.logo{font-family:'Fraunces',serif;font-size:22px;font-weight:600;letter-spacing:-.02em}.logo i{color:var(--ember);font-style:normal}
+.back{background:var(--bg2);border:1px solid var(--line);color:var(--soft);width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;line-height:1}
+.glow{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--soft)}
+.glow .fl{font-size:15px}.glow .fl.lit{filter:drop-shadow(0 0 6px rgba(255,107,53,.8))}
+.glow em{font-style:normal;font-size:12px;color:var(--faint)}
+.body{padding:8px 22px 20px;animation:fade .25s}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.hero{margin:14px 2px 24px}
+.greet{font-family:'Fraunces',serif;font-size:32px;font-weight:500;letter-spacing:-.01em}
+.digest{color:var(--soft);margin-top:6px;font-size:14px}
+.sec{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin:24px 4px 10px}
+.cardbtn{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:10px;cursor:pointer;font-family:inherit;color:var(--ink);transition:.15s}
+.cardbtn:hover{border-color:var(--soft)}
+.cardbtn.inbox{background:linear-gradient(120deg,rgba(255,107,53,.10),var(--card))}
+.cic{width:40px;height:40px;border-radius:11px;background:var(--bg2);display:flex;align-items:center;justify-content:center;color:var(--soft);flex:none;font-size:18px}
+.cic .dot{width:14px;height:14px;border-radius:50%;background:radial-gradient(circle,var(--ember),#7a2d12)}
+.cmain{flex:1;min-width:0}.cname{display:block;font-size:16px}.csub{display:block;font-size:12px;color:var(--faint);margin-top:3px}
+.carr{color:var(--faint);flex:none;font-size:16px}
+.newproj{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:none;border:1px dashed var(--line);color:var(--soft);border-radius:16px;padding:14px;cursor:pointer;font-family:inherit;font-size:14px;margin-top:4px;transition:.15s}
+.newproj:hover{border-color:var(--soft);color:var(--ink)}
+.dhead{display:flex;align-items:center;justify-content:space-between;margin:14px 2px 22px}
+.dhead h1{font-family:'Fraunces',serif;font-weight:500;font-size:30px;letter-spacing:-.01em}
+.delproj{background:none;border:none;color:var(--faint);cursor:pointer;font-size:16px}.delproj:hover{color:var(--ember)}
+.stream{margin-bottom:26px}
+.shead{display:flex;align-items:center;gap:7px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin-bottom:12px}
+.shead.idea{color:var(--idea)}
+.emptyline{color:var(--faint);font-size:13px;margin-bottom:6px;padding-left:4px}
+.item{display:flex;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid var(--line);animation:fade .2s}
+.check{position:relative;flex:none;width:24px;height:24px;border-radius:7px;border:2px solid var(--amber);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#13100e;transition:.15s;font-size:13px;font-weight:700}
+.check:hover{background:rgba(240,168,48,.15)}
+.check.on{background:var(--green);border-color:var(--green)}
+.ititle{flex:1;font-size:15px;word-break:break-word}
+.fromidea{color:var(--idea);font-size:12px;margin-left:5px}
+.item.done .ititle{text-decoration:line-through;color:var(--faint)}
+.ideadot{flex:none;width:9px;height:9px;border-radius:50%;background:var(--idea);margin:0 7px;box-shadow:0 0 8px rgba(125,180,196,.5)}
+.item.idea .ititle{color:#d8d0c2}
+.promote{display:flex;align-items:center;gap:4px;background:rgba(125,180,196,.12);border:1px solid transparent;color:var(--idea);font-family:inherit;font-size:12px;padding:6px 11px;border-radius:12px;cursor:pointer;flex:none}
+.promote:hover{border-color:var(--idea)}
+.del{background:none;border:none;color:var(--faint);cursor:pointer;padding:4px;flex:none;font-size:13px}
+.del:hover{color:var(--ember)}
+.burst{position:absolute;inset:0;pointer-events:none}
+.burst i{position:absolute;top:50%;left:50%;width:5px;height:5px;border-radius:50%;background:var(--amber);transform:translate(-50%,-50%);animation:spark var(--d) ease-out forwards}
+.burst i.big{background:var(--ember);box-shadow:0 0 6px var(--ember)}
+@keyframes spark{0%{opacity:1;transform:translate(-50%,-50%) rotate(var(--a)) translateY(0) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) rotate(var(--a)) translateY(-28px) scale(.3)}}
+.cap{display:flex;flex-direction:column;align-items:center;padding-top:30px}
+.mic{position:relative;width:104px;height:104px;border-radius:50%;border:none;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none;background:radial-gradient(circle at 30% 30%,#2c241e,#16110e);color:var(--ink);display:flex;align-items:center;justify-content:center;box-shadow:0 14px 40px -12px rgba(0,0,0,.8),inset 0 0 0 1px var(--line);transition:.2s}
+.mic svg{width:30px;height:30px}
+.mic.live{background:radial-gradient(circle at 30% 30%,#ff8a5c,var(--ember));color:#13100e;box-shadow:0 14px 50px -8px rgba(255,107,53,.6)}
+.mic .ring{position:absolute;inset:0;border-radius:50%;border:2px solid var(--ember);opacity:0}
+.mic.live .r1{animation:pulse 1.8s ease-out infinite}.mic.live .r2{animation:pulse 1.8s ease-out infinite .9s}
+@keyframes pulse{0%{opacity:.6;transform:scale(1)}100%{opacity:0;transform:scale(1.7)}}
+.status{margin:18px 0 4px;color:var(--soft);font-size:13px;text-align:center}
+.field{width:100%;max-width:420px;margin-top:14px;background:none;border:none;border-bottom:2px solid var(--line);outline:none;font-family:'Fraunces',serif;font-size:22px;color:var(--ink);padding:8px 2px;text-align:center}
+.field:focus{border-color:var(--ember)}.field::placeholder{color:var(--faint);font-style:italic}
+.warn{margin-top:12px;color:var(--amber);font-size:12px;text-align:center;line-height:1.5}
+.extra{width:100%;max-width:420px;margin-top:26px;animation:fade .2s}
+.crow{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.clbl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);width:100%;margin-bottom:2px}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--line);color:var(--soft);font-family:inherit;font-size:13px;padding:8px 13px;border-radius:18px;cursor:pointer;transition:.15s}
+.pill:hover{border-color:var(--soft)}.pill.on{color:var(--ink);border-color:var(--ink);background:var(--card)}
+.addbtn{width:100%;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--ember);color:#13100e;border:none;font-family:inherit;font-weight:700;font-size:15px;padding:15px;border-radius:14px;cursor:pointer}
+.fab{position:fixed;bottom:max(22px,env(safe-area-inset-bottom));right:22px;width:58px;height:58px;border-radius:50%;background:var(--ember);color:#13100e;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 30px -8px rgba(255,107,53,.6);z-index:50;font-size:26px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const KEY="nu-projekt-v1";
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const isoD=d=>d.toISOString().slice(0,10);
+const today=()=>isoD(new Date());
+const yest=()=>{const d=new Date();d.setDate(d.getDate()-1);return isoD(d)};
+const Recog=window.SpeechRecognition||window.webkitSpeechRecognition;
+const MIC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v4"/></svg>';
+const STOP='<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
+
+let s={projects:[],items:[],stats:{streak:0,lastActive:"",todayDate:"",todayCount:0,ideasRealized:0},view:"list",cur:null};
+let cap={draft:"",dest:"inbox",kind:"task",listening:false,err:"",micReady:false};
+let rec=null,micStream=null,audio=null;
+
+function seedIfEmpty(){
+  s.projects=[{id:"p_studie",name:"StudiePlan",createdAt:Date.now()}];
+  s.items=[
+    {id:"i1",projectId:"p_studie",type:"task",title:"Läsa kapitel 4",done:false,createdAt:Date.now()},
+    {id:"i2",projectId:"p_studie",type:"idea",title:"Spela in sammanfattningar som ljud att lyssna på",done:false,createdAt:Date.now()},
+    {id:"i3",projectId:null,type:"task",title:"Boka tvättid",done:false,createdAt:Date.now()}
+  ];
+}
+function load(){try{const r=JSON.parse(localStorage.getItem(KEY));if(r&&r.projects){s.projects=r.projects;s.items=r.items||[];s.stats=Object.assign(s.stats,r.stats||{})}else seedIfEmpty()}catch(e){seedIfEmpty()}}
+function save(){localStorage.setItem(KEY,JSON.stringify({projects:s.projects,items:s.items,stats:s.stats}))}
+function esc(t){return(t||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+
+function chime(big){try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;if(!audio)audio=new C();if(audio.state==="suspended")audio.resume();const t0=audio.currentTime;(big?[523.25,659.25,783.99,1046.5]:[659.25,987.77]).forEach((f,i)=>{const o=audio.createOscillator(),g=audio.createGain();o.type="sine";o.frequency.value=f;o.connect(g);g.connect(audio.destination);const t=t0+i*0.06;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.16,t+0.02);g.gain.exponentialRampToValueAtTime(0.001,t+0.4);o.start(t);o.stop(t+0.45)})}catch(e){}}
+function bumpStreak(){const td=today();let st=s.stats;if(st.lastActive===td){}else if(st.lastActive===yest())st.streak+=1;else if(st.lastActive)st.streak=Math.max(1,st.streak-1);else st.streak=1;st.todayCount=(st.todayDate===td?st.todayCount:0);st.lastActive=td;st.todayDate=td}
+
+function completeTask(id){
+  const it=s.items.find(x=>x.id===id);if(!it)return;
+  chime(!!it.fromIdea);
+  const el=document.getElementById("chk_"+id);
+  if(el){const b=document.createElement("span");b.className="burst";const n=it.fromIdea?12:7;for(let i=0;i<n;i++){const p=document.createElement("i");if(it.fromIdea)p.className="big";p.style.setProperty("--a",(360/n*i)+"deg");p.style.setProperty("--d",(0.3+Math.random()*0.3)+"s");b.appendChild(p)}el.appendChild(b)}
+  setTimeout(()=>{bumpStreak();s.stats.todayCount+=1;if(it.fromIdea)s.stats.ideasRealized+=1;it.done=true;it.completedAt=Date.now();save();render()},430);
+}
+function uncomplete(id){const it=s.items.find(x=>x.id===id);if(it){it.done=false;save();render()}}
+function removeItem(id){s.items=s.items.filter(x=>x.id!==id);save();render()}
+function promote(id){const it=s.items.find(x=>x.id===id);if(it){it.type="task";it.fromIdea=true;save();render()}}
+function addItem(){const t=cap.draft.trim();if(!t)return;s.items.push({id:uid(),projectId:cap.dest==="inbox"?null:cap.dest,type:cap.kind,title:t,done:false,createdAt:Date.now()});cap.draft="";cap.kind="task";save();render()}
+function addProject(){const name=(prompt("Vad heter projektet?")||"").trim();if(!name)return;const id=uid();s.projects.push({id,name,createdAt:Date.now()});s.cur=id;s.view="detail";save();render()}
+function removeProject(id){s.projects=s.projects.filter(p=>p.id!==id);s.items.forEach(x=>{if(x.projectId===id)x.projectId=null});s.view="list";save();render()}
+function go(v){s.view=v;if(v==="capture"){cap.draft="";cap.err=""}render()}
+function openProj(id){s.cur=id;s.view="detail";render()}
+
+async function enableMic(){if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){cap.err="nosupport";render();return}try{micStream=await navigator.mediaDevices.getUserMedia({audio:true});cap.micReady=true;cap.err="";render()}catch(e){cap.err="denied";render()}}
+function startListen(){if(!Recog){cap.err="nosupport";render();return}try{rec=new Recog();rec.lang="sv-SE";rec.interimResults=true;rec.continuous=true;let fin="";rec.onresult=e=>{let int="";for(let i=e.resultIndex;i<e.results.length;i++){const tr=e.results[i][0].transcript;if(e.results[i].isFinal)fin+=tr+" ";else int+=tr}cap.draft=(fin+int).replace(/\s+/g," ").trim();const f=document.getElementById("field");if(f)f.value=cap.draft;if(cap.draft&&!document.getElementById("extra"))render()};rec.onerror=e=>{if(e.error==="not-allowed"||e.error==="service-not-allowed"){cap.err="denied";rec.want=false;cap.listening=false;render()}};rec.onend=()=>{if(rec.want){try{rec.start();return}catch(e){}}cap.listening=false;render()};rec.want=true;cap.err="";cap.listening=true;render();rec.start()}catch(e){cap.err="denied";render()}}
+function stopListen(){if(rec)rec.want=false;try{rec&&rec.stop()}catch(e){}cap.listening=false;render()}
+function holdStart(e){e.preventDefault();if(!cap.listening)startListen()}
+function holdEnd(e){e.preventDefault();if(cap.listening)stopListen()}
+
+function greeting(){const h=new Date().getHours();return h<10?"God morgon":h<18?"Hej":"God kväll"}
+function pstats(id){const its=s.items.filter(i=>i.projectId===id);return{tasks:its.filter(i=>i.type==="task"&&!i.done).length,ideas:its.filter(i=>i.type==="idea").length}}
+
+function render(){
+  const app=document.getElementById("app");
+  const td=today();
+  let h='<div class="top">';
+  h+=(s.view==="detail"||s.view==="capture")?'<button class="back" onclick="go(\'list\')">‹</button>':'<span class="logo">Nu<i>.</i></span>';
+  h+='<div class="glow"><span class="fl '+(s.stats.streak>0?"lit":"")+'">🔥</span><span>'+s.stats.streak+'</span>'+(s.stats.todayDate===td&&s.stats.todayCount>0?'<em>· '+s.stats.todayCount+' klara idag</em>':'')+'</div></div>';
+
+  if(s.view==="list"){
+    const inbox=s.items.filter(i=>!i.projectId&&!i.done);
+    const dueT=s.items.filter(i=>!i.done&&i.type==="task").length;
+    h+='<div class="body"><div class="hero"><p class="greet">'+greeting()+'.</p><p class="digest">'+(dueT>0?dueT+(dueT===1?" uppgift väntar.":" uppgifter väntar."):"Inget brådskar — fånga en tanke.")+'</p></div>';
+    if(inbox.length>0)h+='<button class="cardbtn inbox" onclick="openProj(\'inbox\')"><div class="cic">📥</div><div class="cmain"><span class="cname">Inkorg</span><span class="csub">'+inbox.length+' osorterade</span></div><span class="carr">→</span></button>';
+    h+='<div class="sec">Projekt</div>';
+    s.projects.forEach(p=>{const st=pstats(p.id);h+='<button class="cardbtn" onclick="openProj(\''+p.id+'\')"><div class="cic"><span class="dot"></span></div><div class="cmain"><span class="cname">'+esc(p.name)+'</span><span class="csub">'+st.tasks+' uppgifter · '+st.ideas+' idéer</span></div><span class="carr">→</span></button>'});
+    h+='<button class="newproj" onclick="addProject()">＋ Nytt projekt</button></div>';
+  }
+
+  if(s.view==="detail"){
+    const isInbox=s.cur==="inbox";const proj=s.projects.find(p=>p.id===s.cur);
+    const its=s.items.filter(i=>isInbox?!i.projectId:i.projectId===s.cur);
+    const tasks=its.filter(i=>i.type==="task");const ideas=its.filter(i=>i.type==="idea");
+    h+='<div class="body"><div class="dhead"><h1>'+(isInbox?"Inkorg":esc(proj?proj.name:""))+'</h1>'+(!isInbox&&proj?'<button class="delproj" onclick="removeProject(\''+proj.id+'\')">🗑</button>':'')+'</div>';
+    h+='<div class="stream"><div class="shead">▸ Uppgifter</div>';
+    if(tasks.filter(t=>!t.done).length===0)h+='<p class="emptyline">Inga öppna uppgifter.</p>';
+    tasks.filter(t=>!t.done).forEach(t=>{h+='<div class="item"><button class="check" id="chk_'+t.id+'" onclick="completeTask(\''+t.id+'\')"></button><span class="ititle">'+esc(t.title)+(t.fromIdea?'<span class="fromidea">💡</span>':'')+'</span><button class="del" onclick="removeItem(\''+t.id+'\')">🗑</button></div>'});
+    tasks.filter(t=>t.done).forEach(t=>{h+='<div class="item done"><button class="check on" onclick="uncomplete(\''+t.id+'\')">✓</button><span class="ititle">'+esc(t.title)+'</span><button class="del" onclick="removeItem(\''+t.id+'\')">🗑</button></div>'});
+    h+='</div><div class="stream"><div class="shead idea">💡 Idéer</div>';
+    if(ideas.length===0)h+='<p class="emptyline">Inga idéer än.</p>';
+    ideas.forEach(t=>{h+='<div class="item idea"><span class="ideadot"></span><span class="ititle">'+esc(t.title)+'</span><button class="promote" onclick="promote(\''+t.id+'\')">→ Gör</button><button class="del" onclick="removeItem(\''+t.id+'\')">🗑</button></div>'});
+    h+='</div></div>';
+  }
+
+  if(s.view==="capture"){
+    h+='<div class="body cap">';
+    if(!cap.micReady){h+='<button class="mic" onclick="enableMic()">'+MIC+'</button><p class="status">Tryck för att aktivera mikrofonen</p>'}
+    else{h+='<button class="mic '+(cap.listening?"live":"")+'" onpointerdown="holdStart(event)" onpointerup="holdEnd(event)" onpointerleave="holdEnd(event)" onpointercancel="holdEnd(event)" oncontextmenu="return false">'+(cap.listening?STOP:MIC)+(cap.listening?'<span class="ring r1"></span><span class="ring r2"></span>':'')+'</button><p class="status">'+(cap.listening?"Lyssnar… släpp när du är klar":"Håll inne och prata — eller skriv nedan")+'</p>'}
+    h+='<input id="field" class="field" placeholder="Vad tänker du på?" value="'+esc(cap.draft)+'" oninput="cap.draft=this.value;if(this.value.trim()&&!document.getElementById(\'extra\'))render()" onkeydown="if(event.key===\'Enter\')addItem()">';
+    if(cap.err==="denied")h+='<p class="warn">Mikrofonen blockerades. Tillåt mikrofon i webbläsaren och försök igen, eller skriv i fältet.</p>';
+    if(cap.err==="nosupport")h+='<p class="warn">Röst stöds inte i den här webbläsaren — skriv i fältet istället.</p>';
+    if(cap.draft.trim()){
+      h+='<div id="extra" class="extra"><div class="crow"><span class="clbl">Det här är en</span><button class="pill '+(cap.kind==="task"?"on":"")+'" onclick="cap.kind=\'task\';render()">▸ Uppgift</button><button class="pill '+(cap.kind==="idea"?"on":"")+'" onclick="cap.kind=\'idea\';render()">💡 Idé</button></div>';
+      h+='<div class="crow"><span class="clbl">Lägg i</span><button class="pill '+(cap.dest==="inbox"?"on":"")+'" onclick="cap.dest=\'inbox\';render()">📥 Inkorg</button>';
+      s.projects.forEach(p=>{h+='<button class="pill '+(cap.dest===p.id?"on":"")+'" onclick="cap.dest=\''+p.id+'\';render()">'+esc(p.name)+'</button>'});
+      h+='</div><button class="addbtn" onclick="addItem()">＋ Lägg till</button></div>';
+    }
+    h+='</div>';
+  }
+
+  if(s.view!=="capture")h+='<button class="fab" onclick="go(\'capture\')">＋</button>';
+  app.innerHTML=h;
+}
+load();render();
+</script>
+</body>
+</html>
