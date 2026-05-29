@@ -22,6 +22,7 @@ Körbar, installerad och verifierad PWA på GitHub Pages. Vanilla JS (`index.htm
 - ✅ **Namnbyte** "Nu." → **ToDoNu** överallt.
 - ✅ **In-app morgonhälsning** (roadmap-punkt 2, steg 1) — morgonkort högst upp på list-vyn vid första öppning under morgontimmarna (04–11:59), en gång/dag. Hälsning + antal öppna uppgifter + osorterade i inkorgen, lågpress-ton, stängbart. Persisteras via `localStorage["nu-morning"]`. `morningDigest()`/`dismissMorning()` i `index.html`.
 - ✅ **Fångst-flöde fixat** — `addItem()` återgår till list-vyn efter tillägg (Enter = fånga + tillbaka i ett steg; fastnade förut på tom fångst-vy). Bakåtknappen gjord till tydlig pill (`‹ Tillbaka`, 44px). VER 1.5.
+- ✅ **Säkerhetskopia (export/import)** — `↓ Exportera säkerhetskopia` / `↑ Importera` längst ner på huvudmenyn. Laddar ner/läser in JSON av `{projects,items,stats}`, validerar + `confirm()` före överskrivning. Lokal backup utan backend. `exportData()`/`pickImport()`/`importData()`. VER 1.6.
 
 ## Nästa steg
 
@@ -31,4 +32,4 @@ Körbar, installerad och verifierad PWA på GitHub Pages. Vanilla JS (`index.htm
 
 - `load()` faller tillbaka på demo-data vid JSON-parse-fel → kan tyst skriva över korrupt lagring. Åtgärda när persistensen rörs.
 - Huvudrenderingen ritar fortfarande om allt via `innerHTML` (riktade uppdateringar finns för steg/typval). Lös vidare vid behov; full migrering till Vite-SPA endast om arkitektur-tripwiren slår till.
-- Kvarstående risk: `localStorage` per enhet, ingen synk. Riktig lösning = IndexedDB/synk.
+- Kvarstående risk: `localStorage` per enhet, ingen synk. Manuell export/import (säkerhetskopia) mildrar dataförlust; riktig lösning på sikt = IndexedDB/synk.

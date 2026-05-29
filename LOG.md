@@ -17,7 +17,13 @@ Skapade `STATUS.md` + `IDEAS.md` (saknades; globala standarden läser dem vid se
 - **Fix 1:** `addItem()` sätter nu `s.view="list"` → fånga + tillbaka till huvudmenyn i ett steg; man ser uppgiften landa (räknaren uppdateras).
 - **Fix 2:** bakåtknappen gjord till en tydlig pill (`‹ Tillbaka`, hög kontrast, 44px träffyta) för fallet "öppna fångst men ångra utan att lägga till".
 - **`VER` bumpad 1.4 → 1.5.**
-- Verifierat: `node --check` på script-blocket utan fel (efter båda fix); de fyra morgon-textfallen genomgångna.
+
+**Säkerhetskopia (export/import) byggd:** ägaren frågade var datan sparas → klargjorde att allt ligger i `localStorage` per enhet/webbläsare, ingen synk, och att en avinstallation av PWA:n *kan* (men inte garanterat) rensa lagringen. Beslut: bygg lokal backup utan backend.
+- `exportData()` — laddar ner `{projects,items,stats}` som `todonu-backup-<datum>.json` (Blob + nedladdningslänk, metadata: app/ver/exportedAt).
+- `pickImport()` + `importData(file)` — filväljare on demand, parsar + **validerar** (kräver `projects`-array), `confirm()` innan överskrivning (ersätter all data på enheten), `stats` mergas mot default-formen. Vänligt felmeddelande vid ogiltig fil.
+- Diskret rad längst ner på huvudmenyn: `↓ Exportera säkerhetskopia` / `↑ Importera` (dämpad färg).
+- Bara `index.html`, inga beroenden, ingen ändring i `sw.js`/datamodellen. **`VER` bumpad 1.5 → 1.6.**
+- Verifierat: `node --check` på script-blocket utan fel (efter samtliga fix); de fyra morgon-textfallen genomgångna.
 
 ### Kvar / nästa steg
 Morgonsammanfattningen är nu in-app. **Nästa naturliga steg om timingen inte räcker:** uppgradera till väg 2 (Periodic Background Sync → riktig lokal notis utan backend). Väg 3 (web push) väcker arkitektur-tripwiren. Övrig teknisk skuld oförändrad (se `STATUS.md`).
