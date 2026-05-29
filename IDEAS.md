@@ -8,6 +8,7 @@
 
 - **Räcker in-app morgonhälsningen?** Steg 1 (in-app kort vid appöppning) är byggt. Det *påminner* inte aktivt — man måste öppna appen. Om det inte räcker: gå vidare till Periodic Background Sync (se nedan). Avvakta ägarens upplevelse.
 - **Konto/synk — behövs det, eller räcker lokalt per enhet?** Utlöser i så fall arkitektur-tripwiren → Vite + ev. Supabase.
+- **Ska inline-panelen stanna öppen för flera tillägg?** Idag (v1.8) stänger panelen efter varje `＋ uppgift`/`＋ idé` i projekt/inkorg (ägarens val "panel underifrån"). Om man ofta vill lägga flera i rad på samma ställe kan den hållas öppen och återfokusera. Avvakta ägarens upplevelse.
 
 ## Roadmap-idéer (ej byggda)
 
