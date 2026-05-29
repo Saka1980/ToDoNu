@@ -1,0 +1,21 @@
+# Windows-skräp
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+desktop.ini
+$RECYCLE.BIN/
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*~
+
+# Hemligheter (om de dyker upp senare)
+.env
+.env.*
+!.env.example
+
+# Loggar
+*.log
