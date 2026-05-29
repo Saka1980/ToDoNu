@@ -4,19 +4,28 @@ Kronologisk logg över vad vi byggt och *varför*. Nyaste överst när nya rader
 
 ---
 
-## 2026-05-29 — Tredje sessionen (git + GitHub Pages live)
+## 2026-05-29 — Tredje sessionen (git + Pages + PWA byggd)
 
-Avblockerade förra sessionens hängande punkt: **git/GitHub är uppsatt och appen är live.**
+Avblockerade förra sessionens hängande punkt **och** byggde hela PWA-roadmappen.
 
-- `git init` + första commit (CLAUDE.md, LOG.md, index.html), gren `main`.
-- Kopplat till remote: **https://github.com/Saka1980/ToDoNu**.
+### Git + GitHub Pages
+- `git init` + första commit, gren `main`. Remote: **https://github.com/Saka1980/ToDoNu**.
 - **GitHub Pages aktiverat** (Deploy from branch, `main`/root) av ägaren manuellt.
-- Live-URL verifierad (HTTP 200, serverar `index.html`): **https://saka1980.github.io/ToDoNu/** — nu körs appen på **https**, så röst-mikrofonen funkar på mobil.
-- La till `.gitignore` för Windows (skräpfiler, editor-filer, `.env`).
-- Sidospår: testade en Actions-baserad Pages-deploy men tog bort den igen — branch-deploy räcker för en statisk fil.
+- Live-URL verifierad: **https://saka1980.github.io/ToDoNu/** — körs på **https**, så röst funkar på mobil.
+- La till `.gitignore` för Windows. Sidospår: testade Actions-deploy men tog bort den — branch-deploy räcker.
+
+### Buggfix — textfältet hoppade till typval
+Vid skrift kallade `oninput` en full `render()` som förstörde `<input>` → fokus/markör försvann och typval-panelen hoppade fram. Fix: `#extra` renderas alltid och visas/döljs via `toggleExtra()` utan att röra fältet (riktad DOM-uppdatering, i linje med arkitekturbeslutet). Röstens `onresult` togglar likadant.
+
+### PWA (roadmap-punkt 1) — KLAR, byggd i 5 steg
+1. `manifest.json` (standalone, sv, relativa paths) + namnbyte **"Nu." → ToDoNu** (title, logotyp `ToDo`+ember-`Nu`, iOS-titel) + `icons/icon.svg`.
+2. PNG-ikoner genererade med .NET System.Drawing (inga nya paket): 192/512/maskable-512 (full-bleed bg, motiv i säker zon) + apple-touch-icon 180. Inkopplade i manifest.
+3. Service worker `sw.js`: **network-first för HTML** (deploys fastnar aldrig), **cache-first för assets**, versionerad cache. Registreras på load.
+4. **Self-hostade typsnitt**: 6 `.woff2` (Fraunces variabel + Space Mono, latin + latin-ext; vietnamesiska hoppad) → `fonts/fonts.css`, Google Fonts-länken borttagen (GDPR + offline). SW bumpad v1→v2 och förcachar typsnitten.
+5. `navigator.storage.persist()` + lågmäld iOS-hint för "Lägg till på hemskärmen" (bara iOS Safari, ej standalone, minns avvisning).
 
 ### Kvar / nästa steg
-Plattformen står klar. Nästa kodfeature enligt roadmap är **PWA (punkt 1)** — `manifest.json` + service worker (`sw.js`), self-hostade typsnitt, genererade ikoner, namnbyte "Nu." → **ToDoNu**. Detaljplan finns i posten nedan (andra sessionen).
+PWA klar. Verifiera installation på riktig mobil (särskilt iOS). Kvar på roadmappen: **morgonnotis** (punkt 2, klurig på iOS), **bryta ut röst-modulen** (punkt 3), **deluppgifter/checklista** (punkt 6, designad men ej byggd — bygg med riktad omritning). **Kvarstående risk:** iOS kan ändå rensa `localStorage` efter ~7 dagar; `persist()` mildrar men riktig lösning = IndexedDB/synk.
 
 ---
 

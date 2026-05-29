@@ -78,8 +78,9 @@ Mörkt "ember"-tema. Allt via CSS-variabler.
 
 ## Nuvarande implementation
 
-- En enda fil: **`index.html`** — vanilla JS, ingen byggprocess, inga beroenden utöver Google Fonts.
-- Persistens: `localStorage` (per enhet/webbläsare).
+- **`index.html`** — vanilla JS, ingen byggprocess. Huvudkällan.
+- **PWA byggd:** `manifest.json`, service worker `sw.js` (network-first HTML, cache-first assets, versionerad cache), `icons/` (SVG + PNG 192/512/maskable + apple-touch), `fonts/` (self-hostade Fraunces + Space Mono — inga externa beroenden längre).
+- Persistens: `localStorage` (per enhet/webbläsare) + `navigator.storage.persist()`.
 - Tidigare React-prototyper finns i historiken, men `index.html` är den aktuella källan.
 
 ## Köra / deploya
@@ -88,7 +89,7 @@ GitHub Pages från `main` / root. Live-URL: `https://<användarnamn>.github.io/<
 
 ## Roadmap (att göra)
 
-1. **Riktig PWA**: `manifest.json` + service worker → installerbar, fungerar offline. *Detaljplanerad 2026-05-29:* self-hostade typsnitt, genererade PNG-ikoner (192/512/maskable), iOS-hint, namnbyte "Nu." → **ToDoNu**. Risk: iOS kan vakuumera `localStorage` efter ~7 dagars inaktivitet.
+1. ~~**Riktig PWA**: `manifest.json` + service worker → installerbar, fungerar offline.~~ ✅ **KLAR 2026-05-29** — manifest, `sw.js`, PNG/maskable-ikoner, self-hostade typsnitt, iOS-hint, `storage.persist()`, namnbyte "Nu." → **ToDoNu**. Kvarstående risk: iOS kan ändå vakuumera `localStorage` efter ~7 dagars inaktivitet (riktig lösning = IndexedDB/synk).
 2. **Morgonnotis**: Notifications API via service worker. OBS: på iOS krävs installerad PWA och web push är begränsat — undersök lösning.
 3. **Bryt ut röst-till-text** som en återanvändbar modul (ägaren vill kunna testa den i andra projekt).
 4. **Arkitekturbeslut** — *avgjort 2026-05-29: behåll vanilla nu + tripwire.* Migrera till **Vite-SPA** (ej full Next.js) först när någon tröskel slår till: (a) synk/flera enheter, (b) UI > ~3–4 vyer med delat interaktivt tillstånd, (c) upprepad kamp mot vanilla-renderingen. Tills dess: lös den enda svagheten (full `innerHTML`-omritning) med riktade DOM-uppdateringar, och bryt ut röst-modulen (punkt 3).
