@@ -12,7 +12,8 @@ Byggde **deluppgifter/checklista** (roadmap-punkt 6) — designen från andra se
 - `addStep`/`removeStep` via "＋ steg"-knapp på varje öppen uppgift (prompt-input, konsekvent med `addProject`); alltid synlig, indragen checklista + progress `x/y`.
 - `toggleStep` med **riktad DOM-uppdatering** (per arkitekturbeslutet) — avbockning av steg är **tyst** (ingen gnista/pling/streak, tickar inte `todayCount`).
 - Kaskad: huvuduppgiften klar → kvarvarande steg markeras klara.
-- **Justering efter ägartest:** delsteg är **frikopplade** från uppgiftens klar-status — alla delsteg klara gör *inte* uppgiften klar (ägaren: "deluppgifterna klara innebär inte att uppgiften e klar"). Progress blir grön vid x/x i stället. Titlar (uppgift/idé/steg) gjordes redigerbara via klick (`editItem`/`editStep`, förifylld prompt) eftersom redigering helt saknades.
+- **Justering efter ägartest:** delsteg är **frikopplade** från uppgiftens klar-status — alla delsteg klara gör *inte* uppgiften klar (ägaren: "deluppgifterna klara innebär inte att uppgiften e klar"). Progress blir grön vid x/x i stället. Titlar (uppgift/idé/steg) gjordes redigerbara via klick eftersom redigering helt saknades.
+- **Röst överallt:** ägaren saknade röst när man la till deluppgift (`prompt()` är bara text och bryter röst-först-idén). Beslut (med ägaren): ersätt **alla** `prompt()` med en återanvändbar **inmatnings-sheet** (mic + textfält + Klar) som glider upp underifrån — mic och fält framme samtidigt, väljs i stunden (inget läge att slå om). Gäller: lägg till deluppgift, redigera titel, nytt projekt. Fångst-vyns röst lämnades orörd; sheeten fick egen röst via delad `makeRec`-hjälpare. Närmar roadmap-punkt 3 (bryt ut röst-modul).
 - UI-val av ägaren: alltid synlig (matchar "allt syns, inget göms") + "＋ steg"-knapp på uppgiften.
 - Verifierat: `node --check` på script-blocket utan fel.
 
