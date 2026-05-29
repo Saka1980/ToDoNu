@@ -84,6 +84,8 @@ body{background:var(--bg);color:var(--ink);font-family:'Space Mono',monospace;mi
 .sdel:hover{color:var(--ember);opacity:1}
 .addstep{align-self:flex-start;background:none;border:none;color:var(--faint);font-family:inherit;font-size:12px;cursor:pointer;padding:6px 2px}
 .addstep:hover{color:var(--idea)}
+.addhere{display:inline-flex;align-items:center;gap:6px;background:none;border:1px dashed var(--line);color:var(--soft);font-family:inherit;font-size:13px;cursor:pointer;padding:9px 14px;border-radius:12px;margin-top:10px;transition:.15s}
+.addhere:hover{border-color:var(--soft);color:var(--ink)}
 .burst{position:absolute;inset:0;pointer-events:none}
 .burst i{position:absolute;top:50%;left:50%;width:5px;height:5px;border-radius:50%;background:var(--amber);transform:translate(-50%,-50%);animation:spark var(--d) ease-out forwards}
 .burst i.big{background:var(--ember);box-shadow:0 0 6px var(--ember)}
@@ -120,7 +122,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Space Mono',monospace;mi
 <div id="app"></div>
 <script>
 const KEY="nu-projekt-v1";
-const VER="1.7";
+const VER="1.8";
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const isoD=d=>d.toISOString().slice(0,10);
 const today=()=>isoD(new Date());
@@ -130,6 +132,7 @@ let s={projects:[],items:[],stats:{streak:0,lastActive:"",todayDate:"",todayCoun
 let cap={draft:"",dest:"inbox",kind:"task"};
 let audio=null;
 let loadError=false;
+let capMsg="";
 
 function seedIfEmpty(){
   s.projects=[{id:"p_studie",name:"StudiePlan",createdAt:Date.now()}];
@@ -156,13 +159,14 @@ function completeTask(id){
 function uncomplete(id){const it=s.items.find(x=>x.id===id);if(it){it.done=false;save();render()}}
 function removeItem(id){s.items=s.items.filter(x=>x.id!==id);save();render()}
 function promote(id){const it=s.items.find(x=>x.id===id);if(it){it.type="task";it.fromIdea=true;save();render()}}
-function addItem(){const t=cap.draft.trim();if(!t)return;s.items.push({id:uid(),projectId:cap.dest==="inbox"?null:cap.dest,type:cap.kind,title:t,done:false,createdAt:Date.now()});cap.draft="";cap.kind="task";s.view="list";save();render()}
+function addItem(){const t=cap.draft.trim();if(!t)return;s.items.push({id:uid(),projectId:cap.dest==="inbox"?null:cap.dest,type:cap.kind,title:t,done:false,createdAt:Date.now()});cap.draft="";cap.kind="task";capMsg="✓ Tillagt — fånga nästa";save();render();setTimeout(()=>{const f=document.getElementById("field");if(f)try{f.focus()}catch(e){}},40)}
 function addStep(taskId){const it=s.items.find(x=>x.id===taskId);if(!it)return;openSheet("Ny deluppgift","",val=>{if(!it.steps)it.steps=[];it.steps.push({id:uid(),title:val,done:false});save();render()})}
 function removeStep(taskId,stepId){const it=s.items.find(x=>x.id===taskId);if(!it||!it.steps)return;it.steps=it.steps.filter(st=>st.id!==stepId);save();render()}
 function editItem(id){const it=s.items.find(x=>x.id===id);if(!it)return;openSheet("Ändra texten",it.title,val=>{it.title=val;save();render()})}
 function editStep(taskId,stepId){const it=s.items.find(x=>x.id===taskId);if(!it||!it.steps)return;const st=it.steps.find(x=>x.id===stepId);if(!st)return;openSheet("Ändra steget",st.title,val=>{st.title=val;save();render()})}
 function toggleStep(taskId,stepId){const it=s.items.find(x=>x.id===taskId);if(!it||!it.steps)return;const st=it.steps.find(x=>x.id===stepId);if(!st)return;st.done=!st.done;const row=document.getElementById("step_"+taskId+"_"+stepId);if(row){row.classList.toggle("done",st.done);const c=row.querySelector(".scheck");if(c){c.classList.toggle("on",st.done);c.textContent=st.done?"✓":""}}const dn=it.steps.filter(x=>x.done).length;const pr=document.getElementById("prog_"+taskId);if(pr){pr.textContent=dn+"/"+it.steps.length;pr.classList.toggle("all",dn===it.steps.length&&dn>0)}save()}
 function addProject(){openSheet("Nytt projekt","",val=>{const id=uid();s.projects.push({id,name:val,createdAt:Date.now()});s.cur=id;s.view="detail";save();render()})}
+function addHere(kind){const pid=s.cur==="inbox"?null:s.cur;openSheet(kind==="idea"?"Ny idé":"Ny uppgift","",val=>{s.items.push({id:uid(),projectId:pid,type:kind,title:val,done:false,createdAt:Date.now()});save();render()})}
 let sheet=null;
 function openSheet(title,initial,onConfirm){closeSheet();sheet={onConfirm};const bg=document.createElement("div");bg.className="sheet-bg";bg.id="sheetbg";bg.onclick=closeSheet;const el=document.createElement("div");el.className="sheet";el.id="sheet";el.innerHTML='<div class="sheet-t">'+esc(title)+'</div><div class="sheet-row"><input id="sheetfield" class="sheet-f" placeholder="Skriv eller diktera…"></div><div class="sheet-actions"><button class="sheet-cancel">Avbryt</button><button class="sheet-ok">Klar</button></div>';document.body.appendChild(bg);document.body.appendChild(el);const inp=el.querySelector("#sheetfield");inp.value=initial||"";inp.onkeydown=e=>{if(e.key==="Enter")confirmSheet()};setTimeout(()=>{try{inp.focus()}catch(e){}},60);el.querySelector(".sheet-cancel").onclick=closeSheet;el.querySelector(".sheet-ok").onclick=confirmSheet}
 function confirmSheet(){const inp=document.getElementById("sheetfield");if(!inp)return;const v=inp.value.trim();const cb=sheet&&sheet.onConfirm;closeSheet();if(v&&cb)cb(v)}
@@ -172,7 +176,7 @@ function exportData(){const payload={app:"ToDoNu",ver:VER,exportedAt:Date.now(),
 function pickImport(){const inp=document.createElement("input");inp.type="file";inp.accept="application/json,.json";inp.onchange=()=>{if(inp.files&&inp.files[0])importData(inp.files[0])};inp.click()}
 function importData(file){const r=new FileReader();r.onload=()=>{let d;try{const parsed=JSON.parse(r.result);d=parsed&&parsed.data?parsed.data:parsed}catch(e){alert("Kunde inte läsa filen – är det en ToDoNu-backup?");return}if(!d||!Array.isArray(d.projects)){alert("Filen ser inte ut som en ToDoNu-backup.");return}if(!confirm("Importera ersätter all data på den här enheten. Fortsätt?"))return;s.projects=d.projects;s.items=Array.isArray(d.items)?d.items:[];s.stats=Object.assign({streak:0,lastActive:"",todayDate:"",todayCount:0,ideasRealized:0},d.stats||{});loadError=false;s.view="list";s.cur=null;save();render()};r.onerror=()=>alert("Kunde inte läsa filen.");r.readAsText(file)}
 function exportRaw(){const raw=localStorage.getItem(KEY+"-korrupt")||"";const blob=new Blob([raw],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="todonu-rakopia-"+today()+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)}
-function go(v){s.view=v;if(v==="capture"){cap.draft="";render();setTimeout(()=>{const f=document.getElementById("field");if(f)try{f.focus()}catch(e){}},60);return}render()}
+function go(v){capMsg="";s.view=v;if(v==="capture"){cap.draft="";render();setTimeout(()=>{const f=document.getElementById("field");if(f)try{f.focus()}catch(e){}},60);return}render()}
 function openProj(id){s.cur=id;s.view="detail";render()}
 
 function toggleExtra(){const el=document.getElementById("extra");if(el)el.style.display=cap.draft.trim()?"":"none"}
@@ -226,15 +230,17 @@ function render(){
       h+='<button class="addstep" onclick="addStep(\''+t.id+'\')">＋ steg</button></div>';
     });
     tasks.filter(t=>t.done).forEach(t=>{h+='<div class="item done"><button class="check on" onclick="uncomplete(\''+t.id+'\')">✓</button><span class="ititle" onclick="editItem(\''+t.id+'\')">'+esc(t.title)+'</span><button class="del" onclick="removeItem(\''+t.id+'\')">🗑</button></div>'});
+    h+='<button class="addhere" onclick="addHere(\'task\')">＋ uppgift</button>';
     h+='</div><div class="stream"><div class="shead idea">💡 Idéer</div>';
     if(ideas.length===0)h+='<p class="emptyline">Inga idéer än.</p>';
     ideas.forEach(t=>{h+='<div class="item idea"><span class="ideadot"></span><span class="ititle" onclick="editItem(\''+t.id+'\')">'+esc(t.title)+'</span><button class="promote" onclick="promote(\''+t.id+'\')">→ Gör</button><button class="del" onclick="removeItem(\''+t.id+'\')">🗑</button></div>'});
+    h+='<button class="addhere" onclick="addHere(\'idea\')">＋ idé</button>';
     h+='</div></div>';
   }
 
   if(s.view==="capture"){
     h+='<div class="body cap">';
-    h+='<p class="status">Skriv eller diktera med tangentbordets mic</p>';
+    h+='<p class="status">'+(capMsg||"Skriv eller diktera med tangentbordets mic")+'</p>';
     h+='<input id="field" class="field" placeholder="Vad tänker du på?" value="'+esc(cap.draft)+'" oninput="cap.draft=this.value;toggleExtra()" onkeydown="if(event.key===\'Enter\')addItem()">';
     h+='<div id="extra" class="extra" style="'+(cap.draft.trim()?"":"display:none")+'"><div class="crow"><span class="clbl">Det här är en</span><button class="pill '+(cap.kind==="task"?"on":"")+'" onclick="cap.kind=\'task\';render()">▸ Uppgift</button><button class="pill '+(cap.kind==="idea"?"on":"")+'" onclick="cap.kind=\'idea\';render()">💡 Idé</button></div>';
     h+='<div class="crow"><span class="clbl">Lägg i</span><button class="pill '+(cap.dest==="inbox"?"on":"")+'" onclick="cap.dest=\'inbox\';render()">📥 Inkorg</button>';
@@ -243,7 +249,7 @@ function render(){
     h+='</div>';
   }
 
-  if(s.view!=="capture")h+='<button class="fab" onclick="go(\'capture\')">＋</button>';
+  if(s.view==="list")h+='<button class="fab" onclick="go(\'capture\')">＋</button>';
   app.innerHTML=h;
 }
 async function persistStorage(){try{if(navigator.storage&&navigator.storage.persist)await navigator.storage.persist()}catch(e){}}

@@ -30,6 +30,12 @@ Skapade `STATUS.md` + `IDEAS.md` (saknades; globala standarden läser dem vid se
 - **`VER` bumpad 1.6 → 1.7.**
 - Verifierat: `node --check` utan fel + simulering av fyra load-fall (null/giltig/korrupt/korrupt-igen) gav rätt beteende. Morgon-textfallen genomgångna.
 
+**Fångst-flöde omdesignat efter ägarfeedback** — princip: *att lägga till sker på plats där man redan är och kastar aldrig ut en.* (Ersätter dagens tidigare "Fix 1" där `addItem()` hoppade till list-vyn — den övertolkade; den synliga `‹ Tillbaka` räcker som utgång.)
+- **Tillägg på plats** i projekt/inkorg: `＋ uppgift` under Uppgifter och `＋ idé` under Idéer (`addHere(kind)` → glidande panel, ägarens val "panel underifrån"). Sektionen avgör typ, vyn avgör destination → **inga väljare, ingen redundans**. Man stannar kvar på sidan.
+- **Orange + (FAB) bara på huvudsidan** (`s.view==="list"`) — borttagen inifrån projekt/inkorg, där tillägg nu sker via sektionsknapparna.
+- **Huvudsidans fångst stannar kvar** efter Enter (revert av `s.view="list"`): fältet töms, autofokuseras igen, och statusraden visar `✓ Tillagt — fånga nästa` (`capMsg`, nollställs av `go()`). Man går ut själv via `‹ Tillbaka`. Samma "stanna tills jag väljer att gå ut"-logik överallt.
+- **`VER` bumpad 1.7 → 1.8.** Verifierat: `node --check` utan fel; div-strukturen i projektvyn balanserad.
+
 ### Kvar / nästa steg
 Morgonsammanfattningen är nu in-app. **Nästa naturliga steg om timingen inte räcker:** uppgradera till väg 2 (Periodic Background Sync → riktig lokal notis utan backend). Väg 3 (web push) väcker arkitektur-tripwiren. Övrig teknisk skuld oförändrad (se `STATUS.md`).
 

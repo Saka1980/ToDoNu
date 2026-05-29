@@ -24,6 +24,7 @@ Körbar, installerad och verifierad PWA på GitHub Pages. Vanilla JS (`index.htm
 - ✅ **Fångst-flöde fixat** — `addItem()` återgår till list-vyn efter tillägg (Enter = fånga + tillbaka i ett steg; fastnade förut på tom fångst-vy). Bakåtknappen gjord till tydlig pill (`‹ Tillbaka`, 44px). VER 1.5.
 - ✅ **Säkerhetskopia (export/import)** — `↓ Exportera säkerhetskopia` / `↑ Importera` längst ner på huvudmenyn. Laddar ner/läser in JSON av `{projects,items,stats}`, validerar + `confirm()` före överskrivning. Lokal backup utan backend. `exportData()`/`pickImport()`/`importData()`. VER 1.6.
 - ✅ **`load()` härdad mot korrupt data** — vid oläsbar JSON skrivs inget över: råfilen sparas till `nu-projekt-v1-korrupt` och en varningsruta erbjuder `↓ Ladda ner råkopia` (`exportRaw()`) / `↑ Importera backup`. Löser tidigare flaggad teknisk skuld. VER 1.7.
+- ✅ **Fångst-flöde omdesignat** (princip: lägg till på plats, kastas aldrig ut). `＋ uppgift`/`＋ idé` per sektion i projekt/inkorg (`addHere()`, panel underifrån) — sektion avgör typ, vy avgör destination, inga väljare. Orange + (FAB) **bara på huvudsidan**. Huvudsidans fångst **stannar kvar** efter Enter (statusrad `✓ Tillagt — fånga nästa`), utgång via `‹ Tillbaka`. VER 1.8.
 
 ## Nästa steg
 
