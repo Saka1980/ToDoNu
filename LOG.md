@@ -20,7 +20,7 @@ Byggde **deluppgifter/checklista** (roadmap-punkt 6) — designen från andra se
 - Verifierat: `node --check` på script-blocket utan fel.
 
 ### Kvar / nästa steg
-Kvar på roadmappen: **morgonnotis** (punkt 2 — nu vet vi att ägaren kör Android/Pixel, så web push via service worker är fullt möjligt; kräver dock backend/cron för schemalagd notis → väcker arkitektur-tripwiren) och **bryta ut röst-modulen** (punkt 3).
+Kvar på roadmappen: **morgonnotis** (punkt 2 — nu vet vi att ägaren kör Android/Pixel, så web push via service worker är fullt möjligt; kräver dock backend/cron för schemalagd notis → väcker arkitektur-tripwiren). Röst-punkten (3) är överspelad — röst sker via tangentbordets diktering. **Nästa session: börja troligen med morgonnotis.**
 
 ---
 
