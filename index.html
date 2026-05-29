@@ -112,7 +112,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Space Mono',monospace;mi
 <div id="app"></div>
 <script>
 const KEY="nu-projekt-v1";
-const VER="1.1";
+const VER="1.2";
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const isoD=d=>d.toISOString().slice(0,10);
 const today=()=>isoD(new Date());
@@ -162,7 +162,7 @@ function openSheet(title,initial,onConfirm){closeSheet();sheet={onConfirm};const
 function confirmSheet(){const inp=document.getElementById("sheetfield");if(!inp)return;const v=inp.value.trim();const cb=sheet&&sheet.onConfirm;closeSheet();if(v&&cb)cb(v)}
 function closeSheet(){const bg=document.getElementById("sheetbg");if(bg)bg.remove();const el=document.getElementById("sheet");if(el)el.remove();sheet=null}
 function removeProject(id){s.projects=s.projects.filter(p=>p.id!==id);s.items.forEach(x=>{if(x.projectId===id)x.projectId=null});s.view="list";save();render()}
-function go(v){s.view=v;if(v==="capture"){cap.draft="";cap.err=""}render()}
+function go(v){s.view=v;if(v==="capture"){cap.draft="";cap.err="";render();setTimeout(()=>{const f=document.getElementById("field");if(f)try{f.focus()}catch(e){}},60);return}render()}
 function openProj(id){s.cur=id;s.view="detail";render()}
 
 async function enableMic(){if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){cap.err="nosupport";render();return}try{micStream=await navigator.mediaDevices.getUserMedia({audio:true});cap.micReady=true;cap.err="";render()}catch(e){cap.err="denied";render()}}
