@@ -4,6 +4,22 @@ Kronologisk logg över vad vi byggt och *varför*. Nyaste överst när nya rader
 
 ---
 
+## 2026-05-29 — Fjärde sessionen (deluppgifter byggda)
+
+Byggde **deluppgifter/checklista** (roadmap-punkt 6) — designen från andra sessionen, nu i kod.
+
+- Datamodell: `steps[]` på `task` (`step={id,title,done}`), bakåtkompatibelt (saknat fält = ingen lista).
+- `addStep`/`removeStep` via "＋ steg"-knapp på varje öppen uppgift (prompt-input, konsekvent med `addProject`); alltid synlig, indragen checklista + progress `x/y`.
+- `toggleStep` med **riktad DOM-uppdatering** (per arkitekturbeslutet) — avbockning av steg är **tyst** (ingen gnista/pling/streak, tickar inte `todayCount`).
+- Kaskad: sista steget klart → huvuduppgiften auto-klar (firar normalt via `completeTask`); huvuduppgiften klar → kvarvarande steg markeras klara.
+- UI-val av ägaren: alltid synlig (matchar "allt syns, inget göms") + "＋ steg"-knapp på uppgiften.
+- Verifierat: `node --check` på script-blocket utan fel.
+
+### Kvar / nästa steg
+Kvar på roadmappen: **morgonnotis** (punkt 2 — nu vet vi att ägaren kör Android/Pixel, så web push via service worker är fullt möjligt; kräver dock backend/cron för schemalagd notis → väcker arkitektur-tripwiren) och **bryta ut röst-modulen** (punkt 3).
+
+---
+
 ## 2026-05-29 — Tredje sessionen (git + Pages + PWA byggd)
 
 Avblockerade förra sessionens hängande punkt **och** byggde hela PWA-roadmappen.

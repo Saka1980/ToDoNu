@@ -53,7 +53,7 @@ step    = { id, title, done }      // deluppgift i item.steps[]
 stats   = { streak, lastActive, todayDate, todayCount, ideasRealized }
 ```
 
-**Deluppgifter (`steps`)** — *designad 2026-05-29, ej byggd än.* Lättviktig checklista, frivillig och bakåtkompatibel (saknat fält = ingen checklista). Endast uppgifter, ej idéer. Avbocka sista steget → huvuduppgiften auto-klar; avbocka huvuduppgiften → kvarvarande steg markeras klara. Delsteg belönas **tyst** (ingen gnista/pling/streak, tickar inte `todayCount`) — bara huvuduppgiften firar, för att hålla lågpress-tonen. Vald framför nästlade uppgifter av samma skäl.
+**Deluppgifter (`steps`)** — *byggd 2026-05-29.* Lättviktig checklista, frivillig och bakåtkompatibel (saknat fält = ingen checklista). Endast uppgifter, ej idéer. Avbocka sista steget → huvuduppgiften auto-klar; avbocka huvuduppgiften → kvarvarande steg markeras klara. Delsteg belönas **tyst** (ingen gnista/pling/streak, tickar inte `todayCount`) — bara huvuduppgiften firar, för att hålla lågpress-tonen. Vald framför nästlade uppgifter av samma skäl.
 
 ## Glöd (belöningssystem)
 
@@ -94,7 +94,7 @@ GitHub Pages från `main` / root. Live-URL: `https://<användarnamn>.github.io/<
 3. **Bryt ut röst-till-text** som en återanvändbar modul (ägaren vill kunna testa den i andra projekt).
 4. **Arkitekturbeslut** — *avgjort 2026-05-29: behåll vanilla nu + tripwire.* Migrera till **Vite-SPA** (ej full Next.js) först när någon tröskel slår till: (a) synk/flera enheter, (b) UI > ~3–4 vyer med delat interaktivt tillstånd, (c) upprepad kamp mot vanilla-renderingen. Tills dess: lös den enda svagheten (full `innerHTML`-omritning) med riktade DOM-uppdateringar, och bryt ut röst-modulen (punkt 3).
 5. **Synk mellan enheter** (idag är allt lokalt per enhet).
-6. **Deluppgifter (checklista)** — designad (se Datamodell), ej byggd. Bygg med riktad omritning (inte helsidesbygge).
+6. ~~**Deluppgifter (checklista)**~~ ✅ **KLAR 2026-05-29** — frivillig checklista på uppgifter, alltid synlig, "＋ steg"-knapp, tyst avbockning via riktad DOM-uppdatering, auto-klar-kaskad åt båda håll.
 
 ## Öppna frågor
 
