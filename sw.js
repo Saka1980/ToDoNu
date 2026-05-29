@@ -2,7 +2,7 @@
 // Strategi: network-first för HTML (nya deploys fastnar aldrig),
 // cache-first för assets (ikoner m.m. laddar direkt + funkar offline).
 // Höj versionen när cachade assets ändras → gamla cachen rensas i activate.
-const VERSION = 'todonu-v1';
+const VERSION = 'todonu-v2';
 
 // Lokala filer som förcachas vid install (inga cross-origin, t.ex. Google Fonts).
 const CORE = [
@@ -14,6 +14,13 @@ const CORE = [
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',
   './icons/apple-touch-icon.png',
+  './fonts/fonts.css',
+  './fonts/fraunces-latin-400.woff2',
+  './fonts/fraunces-latin-ext-400.woff2',
+  './fonts/spacemono-latin-400.woff2',
+  './fonts/spacemono-latin-700.woff2',
+  './fonts/spacemono-latin-ext-400.woff2',
+  './fonts/spacemono-latin-ext-700.woff2',
 ];
 
 self.addEventListener('install', (e) => {
