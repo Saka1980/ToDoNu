@@ -81,7 +81,9 @@ body{background:var(--bg);color:var(--ink);font-family:'Space Mono',monospace;mi
 .fab{position:fixed;bottom:max(22px,env(safe-area-inset-bottom));right:22px;width:58px;height:58px;border-radius:50%;background:var(--ember);color:#13100e;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 30px -8px rgba(255,107,53,.6);z-index:50;font-size:26px}
 .ioshint{position:fixed;left:12px;right:12px;bottom:max(16px,env(safe-area-inset-bottom));z-index:60;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 14px;display:flex;align-items:center;gap:10px;font-size:13px;line-height:1.45;color:var(--soft);box-shadow:0 14px 34px -10px rgba(0,0,0,.75);animation:fade .3s}
 .ioshint b{color:var(--ink);font-weight:400}.ioshint .sh{color:var(--ember)}
-.ioshint .x{margin-left:auto;flex:none;background:none;border:none;color:var(--faint);font-size:20px;line-height:1;cursor:pointer;padding:2px 4px}
+.ioshint>span{flex:1;min-width:0}
+.ioshint .x{flex:none;background:none;border:none;color:var(--faint);font-size:20px;line-height:1;cursor:pointer;padding:2px 4px}
+.ioshint .inst{flex:none;background:var(--ember);color:#13100e;border:none;font-family:inherit;font-weight:700;font-size:13px;padding:9px 15px;border-radius:10px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -201,6 +203,19 @@ function iosHint(){try{
   el.querySelector(".x").onclick=()=>{localStorage.setItem("nu-ios-hint","dismissed");el.remove()};
   document.body.appendChild(el);
 }catch(e){}}
+let deferredPrompt=null;
+function showInstall(){
+  if(document.getElementById("installbar"))return;
+  if(matchMedia("(display-mode: standalone)").matches)return;
+  if(localStorage.getItem("nu-install-hint")==="dismissed")return;
+  const el=document.createElement("div");el.id="installbar";el.className="ioshint";
+  el.innerHTML='<span>Installera <b>ToDoNu</b> — snabb åtkomst och funkar offline.</span><button class="inst">Installera</button><button class="x" aria-label="Stäng">×</button>';
+  el.querySelector(".inst").onclick=async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();try{await deferredPrompt.userChoice}catch(e){}deferredPrompt=null;el.remove()};
+  el.querySelector(".x").onclick=()=>{localStorage.setItem("nu-install-hint","dismissed");el.remove()};
+  document.body.appendChild(el);
+}
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;showInstall()});
+window.addEventListener("appinstalled",()=>{deferredPrompt=null;const el=document.getElementById("installbar");if(el)el.remove()});
 load();render();persistStorage();iosHint();
 if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})})}
 </script>
