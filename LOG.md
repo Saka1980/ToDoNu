@@ -23,7 +23,12 @@ Skapade `STATUS.md` + `IDEAS.md` (saknades; globala standarden läser dem vid se
 - `pickImport()` + `importData(file)` — filväljare on demand, parsar + **validerar** (kräver `projects`-array), `confirm()` innan överskrivning (ersätter all data på enheten), `stats` mergas mot default-formen. Vänligt felmeddelande vid ogiltig fil.
 - Diskret rad längst ner på huvudmenyn: `↓ Exportera säkerhetskopia` / `↑ Importera` (dämpad färg).
 - Bara `index.html`, inga beroenden, ingen ändring i `sw.js`/datamodellen. **`VER` bumpad 1.5 → 1.6.**
-- Verifierat: `node --check` på script-blocket utan fel (efter samtliga fix); de fyra morgon-textfallen genomgångna.
+
+**`load()` härdad mot korrupt data** (flaggad teknisk skuld sedan andra sessionen): förut körde `catch` → `seedIfEmpty()`, så oläsbar lagring ersattes tyst av demo-data och nästa `save()` skrev över den (kanske räddningsbara) råfilen.
+- Nytt: läs råsträngen först (tom/saknad = första körning → seed). Vid **parse-fel** → sätt `loadError`, spara råsträngen till `nu-projekt-v1-korrupt` (skriver aldrig över en redan sparad råkopia), **seeda inte** och **spara inte** → inget skrivs över.
+- Lugn varningsruta överst på huvudmenyn med `↓ Ladda ner råkopia` (ny `exportRaw()`) + `↑ Importera backup` (befintlig). Import rensar `loadError`.
+- **`VER` bumpad 1.6 → 1.7.**
+- Verifierat: `node --check` utan fel + simulering av fyra load-fall (null/giltig/korrupt/korrupt-igen) gav rätt beteende. Morgon-textfallen genomgångna.
 
 ### Kvar / nästa steg
 Morgonsammanfattningen är nu in-app. **Nästa naturliga steg om timingen inte räcker:** uppgradera till väg 2 (Periodic Background Sync → riktig lokal notis utan backend). Väg 3 (web push) väcker arkitektur-tripwiren. Övrig teknisk skuld oförändrad (se `STATUS.md`).

@@ -48,6 +48,11 @@ body{background:var(--bg);color:var(--ink);font-family:'Space Mono',monospace;mi
 .tools{display:flex;gap:16px;justify-content:center;margin:26px 4px 4px;flex-wrap:wrap}
 .tlink{background:none;border:none;color:var(--faint);font-family:inherit;font-size:12px;cursor:pointer;padding:6px 4px;letter-spacing:.02em}
 .tlink:hover{color:var(--soft)}
+.warn{background:rgba(255,107,53,.10);border:1px solid var(--ember);border-radius:14px;padding:14px 16px;margin:14px 2px 18px;font-size:13px;line-height:1.5;color:var(--ink)}
+.warn .wt{color:var(--ember);font-size:13px;margin-bottom:6px;font-weight:700}
+.warn .wbtns{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.warn .wbtn{background:var(--ember);color:#13100e;border:none;font-family:inherit;font-weight:700;font-size:13px;padding:9px 14px;border-radius:10px;cursor:pointer}
+.warn .wbtn.alt{background:none;border:1px solid var(--soft);color:var(--ink);font-weight:400}
 .dhead{display:flex;align-items:center;justify-content:space-between;margin:14px 2px 22px}
 .dhead h1{font-family:'Fraunces',serif;font-weight:500;font-size:30px;letter-spacing:-.01em}
 .delproj{background:none;border:none;color:var(--faint);cursor:pointer;font-size:16px}.delproj:hover{color:var(--ember)}
@@ -115,7 +120,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Space Mono',monospace;mi
 <div id="app"></div>
 <script>
 const KEY="nu-projekt-v1";
-const VER="1.6";
+const VER="1.7";
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const isoD=d=>d.toISOString().slice(0,10);
 const today=()=>isoD(new Date());
@@ -124,6 +129,7 @@ const yest=()=>{const d=new Date();d.setDate(d.getDate()-1);return isoD(d)};
 let s={projects:[],items:[],stats:{streak:0,lastActive:"",todayDate:"",todayCount:0,ideasRealized:0},view:"list",cur:null};
 let cap={draft:"",dest:"inbox",kind:"task"};
 let audio=null;
+let loadError=false;
 
 function seedIfEmpty(){
   s.projects=[{id:"p_studie",name:"StudiePlan",createdAt:Date.now()}];
@@ -133,7 +139,7 @@ function seedIfEmpty(){
     {id:"i3",projectId:null,type:"task",title:"Boka tvättid",done:false,createdAt:Date.now()}
   ];
 }
-function load(){try{const r=JSON.parse(localStorage.getItem(KEY));if(r&&r.projects){s.projects=r.projects;s.items=r.items||[];s.stats=Object.assign(s.stats,r.stats||{})}else seedIfEmpty()}catch(e){seedIfEmpty()}}
+function load(){const raw=localStorage.getItem(KEY);if(raw==null||raw===""){seedIfEmpty();return}try{const r=JSON.parse(raw);if(r&&r.projects){s.projects=r.projects;s.items=r.items||[];s.stats=Object.assign(s.stats,r.stats||{})}else seedIfEmpty()}catch(e){loadError=true;try{if(!localStorage.getItem(KEY+"-korrupt"))localStorage.setItem(KEY+"-korrupt",raw)}catch(_){}}}
 function save(){localStorage.setItem(KEY,JSON.stringify({projects:s.projects,items:s.items,stats:s.stats}))}
 function esc(t){return(t||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
 
@@ -164,7 +170,8 @@ function closeSheet(){const bg=document.getElementById("sheetbg");if(bg)bg.remov
 function removeProject(id){s.projects=s.projects.filter(p=>p.id!==id);s.items.forEach(x=>{if(x.projectId===id)x.projectId=null});s.view="list";save();render()}
 function exportData(){const payload={app:"ToDoNu",ver:VER,exportedAt:Date.now(),data:{projects:s.projects,items:s.items,stats:s.stats}};const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="todonu-backup-"+today()+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)}
 function pickImport(){const inp=document.createElement("input");inp.type="file";inp.accept="application/json,.json";inp.onchange=()=>{if(inp.files&&inp.files[0])importData(inp.files[0])};inp.click()}
-function importData(file){const r=new FileReader();r.onload=()=>{let d;try{const parsed=JSON.parse(r.result);d=parsed&&parsed.data?parsed.data:parsed}catch(e){alert("Kunde inte läsa filen – är det en ToDoNu-backup?");return}if(!d||!Array.isArray(d.projects)){alert("Filen ser inte ut som en ToDoNu-backup.");return}if(!confirm("Importera ersätter all data på den här enheten. Fortsätt?"))return;s.projects=d.projects;s.items=Array.isArray(d.items)?d.items:[];s.stats=Object.assign({streak:0,lastActive:"",todayDate:"",todayCount:0,ideasRealized:0},d.stats||{});s.view="list";s.cur=null;save();render()};r.onerror=()=>alert("Kunde inte läsa filen.");r.readAsText(file)}
+function importData(file){const r=new FileReader();r.onload=()=>{let d;try{const parsed=JSON.parse(r.result);d=parsed&&parsed.data?parsed.data:parsed}catch(e){alert("Kunde inte läsa filen – är det en ToDoNu-backup?");return}if(!d||!Array.isArray(d.projects)){alert("Filen ser inte ut som en ToDoNu-backup.");return}if(!confirm("Importera ersätter all data på den här enheten. Fortsätt?"))return;s.projects=d.projects;s.items=Array.isArray(d.items)?d.items:[];s.stats=Object.assign({streak:0,lastActive:"",todayDate:"",todayCount:0,ideasRealized:0},d.stats||{});loadError=false;s.view="list";s.cur=null;save();render()};r.onerror=()=>alert("Kunde inte läsa filen.");r.readAsText(file)}
+function exportRaw(){const raw=localStorage.getItem(KEY+"-korrupt")||"";const blob=new Blob([raw],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="todonu-rakopia-"+today()+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)}
 function go(v){s.view=v;if(v==="capture"){cap.draft="";render();setTimeout(()=>{const f=document.getElementById("field");if(f)try{f.focus()}catch(e){}},60);return}render()}
 function openProj(id){s.cur=id;s.view="detail";render()}
 
@@ -194,7 +201,9 @@ function render(){
     const mh=new Date().getHours();
     const showMorning=mh>=4&&mh<12&&localStorage.getItem("nu-morning")!==td;
     if(showMorning)localStorage.setItem("nu-morning",td);
-    h+='<div class="body">'+(showMorning?morningDigest():'<div class="hero"><p class="greet">'+greeting()+'.</p><p class="digest">'+(dueT>0?dueT+(dueT===1?" uppgift väntar.":" uppgifter väntar."):"Inget brådskar — fånga en tanke.")+'</p></div>');
+    h+='<div class="body">';
+    if(loadError)h+='<div class="warn"><div class="wt">⚠ Kunde inte läsa sparad data</div>Inget har skrivits över — en råkopia av den oläsbara filen är sparad på enheten. Ladda ner den, eller återställ från en tidigare säkerhetskopia.<div class="wbtns"><button class="wbtn" onclick="exportRaw()">↓ Ladda ner råkopia</button><button class="wbtn alt" onclick="pickImport()">↑ Importera backup</button></div></div>';
+    h+=(showMorning?morningDigest():'<div class="hero"><p class="greet">'+greeting()+'.</p><p class="digest">'+(dueT>0?dueT+(dueT===1?" uppgift väntar.":" uppgifter väntar."):"Inget brådskar — fånga en tanke.")+'</p></div>');
     if(inbox.length>0)h+='<button class="cardbtn inbox" onclick="openProj(\'inbox\')"><div class="cic">📥</div><div class="cmain"><span class="cname">Inkorg</span><span class="csub">'+inbox.length+' osorterade</span></div><span class="carr">→</span></button>';
     h+='<div class="sec">Projekt</div>';
     s.projects.forEach(p=>{const st=pstats(p.id);h+='<button class="cardbtn" onclick="openProj(\''+p.id+'\')"><div class="cic"><span class="dot"></span></div><div class="cmain"><span class="cname">'+esc(p.name)+'</span><span class="csub">'+st.tasks+' uppgifter · '+st.ideas+' idéer</span></div><span class="carr">→</span></button>'});
