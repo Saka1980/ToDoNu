@@ -79,6 +79,9 @@ body{background:var(--bg);color:var(--ink);font-family:'Space Mono',monospace;mi
 .pill:hover{border-color:var(--soft)}.pill.on{color:var(--ink);border-color:var(--ink);background:var(--card)}
 .addbtn{width:100%;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--ember);color:#13100e;border:none;font-family:inherit;font-weight:700;font-size:15px;padding:15px;border-radius:14px;cursor:pointer}
 .fab{position:fixed;bottom:max(22px,env(safe-area-inset-bottom));right:22px;width:58px;height:58px;border-radius:50%;background:var(--ember);color:#13100e;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 30px -8px rgba(255,107,53,.6);z-index:50;font-size:26px}
+.ioshint{position:fixed;left:12px;right:12px;bottom:max(16px,env(safe-area-inset-bottom));z-index:60;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 14px;display:flex;align-items:center;gap:10px;font-size:13px;line-height:1.45;color:var(--soft);box-shadow:0 14px 34px -10px rgba(0,0,0,.75);animation:fade .3s}
+.ioshint b{color:var(--ink);font-weight:400}.ioshint .sh{color:var(--ember)}
+.ioshint .x{margin-left:auto;flex:none;background:none;border:none;color:var(--faint);font-size:20px;line-height:1;cursor:pointer;padding:2px 4px}
 </style>
 </head>
 <body>
@@ -187,7 +190,18 @@ function render(){
   if(s.view!=="capture")h+='<button class="fab" onclick="go(\'capture\')">＋</button>';
   app.innerHTML=h;
 }
-load();render();
+async function persistStorage(){try{if(navigator.storage&&navigator.storage.persist)await navigator.storage.persist()}catch(e){}}
+function iosHint(){try{
+  const ua=navigator.userAgent||"";
+  const isIos=/iphone|ipad|ipod/i.test(ua);
+  const standalone=("standalone" in navigator&&navigator.standalone)||matchMedia("(display-mode: standalone)").matches;
+  if(!isIos||standalone||localStorage.getItem("nu-ios-hint")==="dismissed")return;
+  const el=document.createElement("div");el.className="ioshint";
+  el.innerHTML='<span>Lägg till på hemskärmen: tryck <span class="sh">Dela</span> och välj <b>Lägg till på hemskärmen</b>.</span><button class="x" aria-label="Stäng">×</button>';
+  el.querySelector(".x").onclick=()=>{localStorage.setItem("nu-ios-hint","dismissed");el.remove()};
+  document.body.appendChild(el);
+}catch(e){}}
+load();render();persistStorage();iosHint();
 if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})})}
 </script>
 </body>
