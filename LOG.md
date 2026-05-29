@@ -23,9 +23,10 @@ Vid skrift kallade `oninput` en full `render()` som förstörde `<input>` → fo
 3. Service worker `sw.js`: **network-first för HTML** (deploys fastnar aldrig), **cache-first för assets**, versionerad cache. Registreras på load.
 4. **Self-hostade typsnitt**: 6 `.woff2` (Fraunces variabel + Space Mono, latin + latin-ext; vietnamesiska hoppad) → `fonts/fonts.css`, Google Fonts-länken borttagen (GDPR + offline). SW bumpad v1→v2 och förcachar typsnitten.
 5. `navigator.storage.persist()` + lågmäld iOS-hint för "Lägg till på hemskärmen" (bara iOS Safari, ej standalone, minns avvisning).
+6. **Android install-knapp** via `beforeinstallprompt` — egen banderoll med Installera-knapp som öppnar Chromes install-ruta i ett tryck. Tillkom när det visade sig att ägaren kör **Google Pixel (Android), inte iPhone** → iOS-hinten är död kod för ägaren; mycket i roadmappens iOS-farhågor gäller inte. **Verifierat: installerad och fungerar på Pixel.**
 
 ### Kvar / nästa steg
-PWA klar. Verifiera installation på riktig mobil (särskilt iOS). Kvar på roadmappen: **morgonnotis** (punkt 2, klurig på iOS), **bryta ut röst-modulen** (punkt 3), **deluppgifter/checklista** (punkt 6, designad men ej byggd — bygg med riktad omritning). **Kvarstående risk:** iOS kan ändå rensa `localStorage` efter ~7 dagar; `persist()` mildrar men riktig lösning = IndexedDB/synk.
+PWA klar och verifierad på Android. Kvar på roadmappen: **morgonnotis** (punkt 2, klurig på iOS), **bryta ut röst-modulen** (punkt 3), **deluppgifter/checklista** (punkt 6, designad men ej byggd — bygg med riktad omritning). **Kvarstående risk:** iOS kan ändå rensa `localStorage` efter ~7 dagar; `persist()` mildrar men riktig lösning = IndexedDB/synk.
 
 ---
 
