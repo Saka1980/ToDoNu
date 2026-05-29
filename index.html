@@ -18,6 +18,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Space Mono',monospace;mi
 #app{max-width:620px;margin:0 auto;min-height:100vh;position:relative;overflow:hidden;padding-bottom:96px;background-image:radial-gradient(circle at 50% -8%,rgba(255,107,53,.12),transparent 55%)}
 .top{display:flex;align-items:center;justify-content:space-between;padding:max(20px,env(safe-area-inset-top)) 22px 10px}
 .logo{font-family:'Fraunces',serif;font-size:22px;font-weight:600;letter-spacing:-.02em}.logo i{color:var(--ember);font-style:normal}
+.ver{font-family:'Space Mono',monospace;font-size:10px;font-weight:400;color:var(--faint);letter-spacing:0;margin-right:5px;vertical-align:middle}
 .back{background:var(--bg2);border:1px solid var(--line);color:var(--soft);width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;line-height:1}
 .glow{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--soft)}
 .glow .fl{font-size:15px}.glow .fl.lit{filter:drop-shadow(0 0 6px rgba(255,107,53,.8))}
@@ -115,6 +116,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Space Mono',monospace;mi
 <div id="app"></div>
 <script>
 const KEY="nu-projekt-v1";
+const VER="0.8";
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const isoD=d=>d.toISOString().slice(0,10);
 const today=()=>isoD(new Date());
@@ -184,7 +186,7 @@ function render(){
   const app=document.getElementById("app");
   const td=today();
   let h='<div class="top">';
-  h+=(s.view==="detail"||s.view==="capture")?'<button class="back" onclick="go(\'list\')">‹</button>':'<span class="logo">ToDo<i>Nu</i></span>';
+  h+=(s.view==="detail"||s.view==="capture")?'<button class="back" onclick="go(\'list\')">‹</button>':'<span class="logo"><span class="ver">v'+VER+'</span>ToDo<i>Nu</i></span>';
   h+='<div class="glow"><span class="fl '+(s.stats.streak>0?"lit":"")+'">🔥</span><span>'+s.stats.streak+'</span>'+(s.stats.todayDate===td&&s.stats.todayCount>0?'<em>· '+s.stats.todayCount+' klara idag</em>':'')+'</div></div>';
 
   if(s.view==="list"){
