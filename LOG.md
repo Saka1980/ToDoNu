@@ -4,6 +4,26 @@ Kronologisk logg över vad vi byggt och *varför*. Nyaste överst när nya rader
 
 ---
 
+## 2026-05-29 — Femte sessionen (in-app morgonhälsning + STATUS/IDEAS)
+
+Skapade `STATUS.md` + `IDEAS.md` (saknades; globala standarden läser dem vid sessionsstart) och byggde första steget av **morgonsammanfattning** (roadmap-punkt 2).
+
+- **Designbeslut (med ägaren):** morgonnotis har tre vägar — (1) in-app morgonhälsning utan infra, (2) Periodic Background Sync + lokal notis (riktig notis, ingen backend, funkar på Pixel men ungefärlig tid), (3) web push + cron-backend (exakt, men slår i arkitektur-tripwiren). Ägaren valde **väg 1** — lägst risk, noll infrastruktur, rätt stegsten.
+- **Byggt:** `morningDigest()` + `dismissMorning()`. Ett lugnt morgonkort högst upp på list-vyn som **ersätter** den vanliga hero/digest-raden vid **första öppning under morgontimmarna (04–11:59)**, en gång per dag. Innehåll: "God morgon." + antal öppna uppgifter + antal osorterade i inkorgen; tom dag → "Rent bord. Fånga en tanke när den kommer." Stängbart ×, lågpress-ton, ingen skam.
+- **Persistens:** `localStorage["nu-morning"] = dagens datum` sätts när kortet visas (samma dismissal-mönster som `nu-ios-hint`/`nu-install-hint`). Ingen ändring i `stats`-modellen, ingen ändring i `sw.js`, inga nya beroenden.
+- **`VER` bumpad 1.3 → 1.4** (cache-diagnos).
+
+**UX-fix efter ägartest (bild):** efter att ha lagt till en uppgift (Enter / "＋ Lägg till") blev appen kvar på fångst-vyn med tomt fält — såg ut som att inget hände, och enda vägen tillbaka var en mörk-på-mörk `‹` uppe i hörnet, svår att se/träffa.
+- **Fix 1:** `addItem()` sätter nu `s.view="list"` → fånga + tillbaka till huvudmenyn i ett steg; man ser uppgiften landa (räknaren uppdateras).
+- **Fix 2:** bakåtknappen gjord till en tydlig pill (`‹ Tillbaka`, hög kontrast, 44px träffyta) för fallet "öppna fångst men ångra utan att lägga till".
+- **`VER` bumpad 1.4 → 1.5.**
+- Verifierat: `node --check` på script-blocket utan fel (efter båda fix); de fyra morgon-textfallen genomgångna.
+
+### Kvar / nästa steg
+Morgonsammanfattningen är nu in-app. **Nästa naturliga steg om timingen inte räcker:** uppgradera till väg 2 (Periodic Background Sync → riktig lokal notis utan backend). Väg 3 (web push) väcker arkitektur-tripwiren. Övrig teknisk skuld oförändrad (se `STATUS.md`).
+
+---
+
 ## 2026-05-29 — Fjärde sessionen (deluppgifter byggda)
 
 Byggde **deluppgifter/checklista** (roadmap-punkt 6) — designen från andra sessionen, nu i kod.

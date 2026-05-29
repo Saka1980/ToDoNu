@@ -19,7 +19,9 @@ body{background:var(--bg);color:var(--ink);font-family:'Space Mono',monospace;mi
 .top{display:flex;align-items:center;justify-content:space-between;padding:max(20px,env(safe-area-inset-top)) 22px 10px}
 .logo{font-family:'Fraunces',serif;font-size:22px;font-weight:600;letter-spacing:-.02em}.logo i{color:var(--ember);font-style:normal}
 .ver{font-family:'Space Mono',monospace;font-size:10px;font-weight:400;color:var(--faint);letter-spacing:0;margin-right:5px;vertical-align:middle}
-.back{background:var(--bg2);border:1px solid var(--line);color:var(--soft);width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;line-height:1}
+.back{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--soft);color:var(--ink);height:44px;padding:0 16px 0 11px;border-radius:12px;cursor:pointer;font-family:inherit;font-size:14px;line-height:1;transition:.15s}
+.back:hover{border-color:var(--ink)}.back:active{background:var(--bg2)}
+.back .ba{font-size:21px;margin-top:-2px}
 .glow{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--soft)}
 .glow .fl{font-size:15px}.glow .fl.lit{filter:drop-shadow(0 0 6px rgba(255,107,53,.8))}
 .glow em{font-style:normal;font-size:12px;color:var(--faint)}
@@ -28,6 +30,11 @@ body{background:var(--bg);color:var(--ink);font-family:'Space Mono',monospace;mi
 .hero{margin:14px 2px 24px}
 .greet{font-family:'Fraunces',serif;font-size:32px;font-weight:500;letter-spacing:-.01em}
 .digest{color:var(--soft);margin-top:6px;font-size:14px}
+.morning{position:relative;background:linear-gradient(120deg,rgba(255,107,53,.10),var(--card));border:1px solid var(--line);border-radius:16px;padding:18px 18px 16px;margin:14px 2px 22px;animation:fade .3s}
+.morning .mg{font-family:'Fraunces',serif;font-size:28px;font-weight:500;letter-spacing:-.01em}
+.morning .ms{color:var(--soft);margin-top:6px;font-size:14px;line-height:1.5}
+.morning .mx{position:absolute;top:10px;right:12px;background:none;border:none;color:var(--faint);font-size:20px;line-height:1;cursor:pointer;padding:2px 4px}
+.morning .mx:hover{color:var(--ink)}
 .sec{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin:24px 4px 10px}
 .cardbtn{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:10px;cursor:pointer;font-family:inherit;color:var(--ink);transition:.15s}
 .cardbtn:hover{border-color:var(--soft)}
@@ -105,7 +112,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Space Mono',monospace;mi
 <div id="app"></div>
 <script>
 const KEY="nu-projekt-v1";
-const VER="1.3";
+const VER="1.5";
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const isoD=d=>d.toISOString().slice(0,10);
 const today=()=>isoD(new Date());
@@ -140,7 +147,7 @@ function completeTask(id){
 function uncomplete(id){const it=s.items.find(x=>x.id===id);if(it){it.done=false;save();render()}}
 function removeItem(id){s.items=s.items.filter(x=>x.id!==id);save();render()}
 function promote(id){const it=s.items.find(x=>x.id===id);if(it){it.type="task";it.fromIdea=true;save();render()}}
-function addItem(){const t=cap.draft.trim();if(!t)return;s.items.push({id:uid(),projectId:cap.dest==="inbox"?null:cap.dest,type:cap.kind,title:t,done:false,createdAt:Date.now()});cap.draft="";cap.kind="task";save();render()}
+function addItem(){const t=cap.draft.trim();if(!t)return;s.items.push({id:uid(),projectId:cap.dest==="inbox"?null:cap.dest,type:cap.kind,title:t,done:false,createdAt:Date.now()});cap.draft="";cap.kind="task";s.view="list";save();render()}
 function addStep(taskId){const it=s.items.find(x=>x.id===taskId);if(!it)return;openSheet("Ny deluppgift","",val=>{if(!it.steps)it.steps=[];it.steps.push({id:uid(),title:val,done:false});save();render()})}
 function removeStep(taskId,stepId){const it=s.items.find(x=>x.id===taskId);if(!it||!it.steps)return;it.steps=it.steps.filter(st=>st.id!==stepId);save();render()}
 function editItem(id){const it=s.items.find(x=>x.id===id);if(!it)return;openSheet("Ändra texten",it.title,val=>{it.title=val;save();render()})}
@@ -157,19 +164,31 @@ function openProj(id){s.cur=id;s.view="detail";render()}
 
 function toggleExtra(){const el=document.getElementById("extra");if(el)el.style.display=cap.draft.trim()?"":"none"}
 function greeting(){const h=new Date().getHours();return h<10?"God morgon":h<18?"Hej":"God kväll"}
+function morningDigest(){
+  const openT=s.items.filter(i=>!i.done&&i.type==="task").length;
+  const inbox=s.items.filter(i=>!i.projectId&&!i.done).length;
+  let line;
+  if(openT===0&&inbox===0)line="Rent bord. Fånga en tanke när den kommer.";
+  else{const parts=[];if(openT>0)parts.push(openT+(openT===1?" uppgift väntar":" uppgifter väntar"));if(inbox>0)parts.push(inbox+" i inkorgen att sortera");line=parts.join(" · ")+".";}
+  return '<div class="morning"><button class="mx" onclick="dismissMorning(this)" aria-label="Stäng">×</button><p class="mg">God morgon.</p><p class="ms">'+line+'</p></div>';
+}
+function dismissMorning(btn){const c=btn.closest(".morning");if(c)c.remove()}
 function pstats(id){const its=s.items.filter(i=>i.projectId===id);return{tasks:its.filter(i=>i.type==="task"&&!i.done).length,ideas:its.filter(i=>i.type==="idea").length}}
 
 function render(){
   const app=document.getElementById("app");
   const td=today();
   let h='<div class="top">';
-  h+=(s.view==="detail"||s.view==="capture")?'<button class="back" onclick="go(\'list\')">‹</button>':'<span class="logo"><span class="ver">v'+VER+'</span>ToDo<i>Nu</i></span>';
+  h+=(s.view==="detail"||s.view==="capture")?'<button class="back" onclick="go(\'list\')"><span class="ba">‹</span>Tillbaka</button>':'<span class="logo"><span class="ver">v'+VER+'</span>ToDo<i>Nu</i></span>';
   h+='<div class="glow"><span class="fl '+(s.stats.streak>0?"lit":"")+'">🔥</span><span>'+s.stats.streak+'</span>'+(s.stats.todayDate===td&&s.stats.todayCount>0?'<em>· '+s.stats.todayCount+' klara idag</em>':'')+'</div></div>';
 
   if(s.view==="list"){
     const inbox=s.items.filter(i=>!i.projectId&&!i.done);
     const dueT=s.items.filter(i=>!i.done&&i.type==="task").length;
-    h+='<div class="body"><div class="hero"><p class="greet">'+greeting()+'.</p><p class="digest">'+(dueT>0?dueT+(dueT===1?" uppgift väntar.":" uppgifter väntar."):"Inget brådskar — fånga en tanke.")+'</p></div>';
+    const mh=new Date().getHours();
+    const showMorning=mh>=4&&mh<12&&localStorage.getItem("nu-morning")!==td;
+    if(showMorning)localStorage.setItem("nu-morning",td);
+    h+='<div class="body">'+(showMorning?morningDigest():'<div class="hero"><p class="greet">'+greeting()+'.</p><p class="digest">'+(dueT>0?dueT+(dueT===1?" uppgift väntar.":" uppgifter väntar."):"Inget brådskar — fånga en tanke.")+'</p></div>');
     if(inbox.length>0)h+='<button class="cardbtn inbox" onclick="openProj(\'inbox\')"><div class="cic">📥</div><div class="cmain"><span class="cname">Inkorg</span><span class="csub">'+inbox.length+' osorterade</span></div><span class="carr">→</span></button>';
     h+='<div class="sec">Projekt</div>';
     s.projects.forEach(p=>{const st=pstats(p.id);h+='<button class="cardbtn" onclick="openProj(\''+p.id+'\')"><div class="cic"><span class="dot"></span></div><div class="cmain"><span class="cname">'+esc(p.name)+'</span><span class="csub">'+st.tasks+' uppgifter · '+st.ideas+' idéer</span></div><span class="carr">→</span></button>'});
