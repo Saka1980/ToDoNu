@@ -129,11 +129,12 @@ function go(v){s.view=v;if(v==="capture"){cap.draft="";cap.err=""}render()}
 function openProj(id){s.cur=id;s.view="detail";render()}
 
 async function enableMic(){if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){cap.err="nosupport";render();return}try{micStream=await navigator.mediaDevices.getUserMedia({audio:true});cap.micReady=true;cap.err="";render()}catch(e){cap.err="denied";render()}}
-function startListen(){if(!Recog){cap.err="nosupport";render();return}try{rec=new Recog();rec.lang="sv-SE";rec.interimResults=true;rec.continuous=true;let fin="";rec.onresult=e=>{let int="";for(let i=e.resultIndex;i<e.results.length;i++){const tr=e.results[i][0].transcript;if(e.results[i].isFinal)fin+=tr+" ";else int+=tr}cap.draft=(fin+int).replace(/\s+/g," ").trim();const f=document.getElementById("field");if(f)f.value=cap.draft;if(cap.draft&&!document.getElementById("extra"))render()};rec.onerror=e=>{if(e.error==="not-allowed"||e.error==="service-not-allowed"){cap.err="denied";rec.want=false;cap.listening=false;render()}};rec.onend=()=>{if(rec.want){try{rec.start();return}catch(e){}}cap.listening=false;render()};rec.want=true;cap.err="";cap.listening=true;render();rec.start()}catch(e){cap.err="denied";render()}}
+function startListen(){if(!Recog){cap.err="nosupport";render();return}try{rec=new Recog();rec.lang="sv-SE";rec.interimResults=true;rec.continuous=true;let fin="";rec.onresult=e=>{let int="";for(let i=e.resultIndex;i<e.results.length;i++){const tr=e.results[i][0].transcript;if(e.results[i].isFinal)fin+=tr+" ";else int+=tr}cap.draft=(fin+int).replace(/\s+/g," ").trim();const f=document.getElementById("field");if(f)f.value=cap.draft;toggleExtra()};rec.onerror=e=>{if(e.error==="not-allowed"||e.error==="service-not-allowed"){cap.err="denied";rec.want=false;cap.listening=false;render()}};rec.onend=()=>{if(rec.want){try{rec.start();return}catch(e){}}cap.listening=false;render()};rec.want=true;cap.err="";cap.listening=true;render();rec.start()}catch(e){cap.err="denied";render()}}
 function stopListen(){if(rec)rec.want=false;try{rec&&rec.stop()}catch(e){}cap.listening=false;render()}
 function holdStart(e){e.preventDefault();if(!cap.listening)startListen()}
 function holdEnd(e){e.preventDefault();if(cap.listening)stopListen()}
 
+function toggleExtra(){const el=document.getElementById("extra");if(el)el.style.display=cap.draft.trim()?"":"none"}
 function greeting(){const h=new Date().getHours();return h<10?"God morgon":h<18?"Hej":"God kväll"}
 function pstats(id){const its=s.items.filter(i=>i.projectId===id);return{tasks:its.filter(i=>i.type==="task"&&!i.done).length,ideas:its.filter(i=>i.type==="idea").length}}
 
@@ -173,15 +174,13 @@ function render(){
     h+='<div class="body cap">';
     if(!cap.micReady){h+='<button class="mic" onclick="enableMic()">'+MIC+'</button><p class="status">Tryck för att aktivera mikrofonen</p>'}
     else{h+='<button class="mic '+(cap.listening?"live":"")+'" onpointerdown="holdStart(event)" onpointerup="holdEnd(event)" onpointerleave="holdEnd(event)" onpointercancel="holdEnd(event)" oncontextmenu="return false">'+(cap.listening?STOP:MIC)+(cap.listening?'<span class="ring r1"></span><span class="ring r2"></span>':'')+'</button><p class="status">'+(cap.listening?"Lyssnar… släpp när du är klar":"Håll inne och prata — eller skriv nedan")+'</p>'}
-    h+='<input id="field" class="field" placeholder="Vad tänker du på?" value="'+esc(cap.draft)+'" oninput="cap.draft=this.value;if(this.value.trim()&&!document.getElementById(\'extra\'))render()" onkeydown="if(event.key===\'Enter\')addItem()">';
+    h+='<input id="field" class="field" placeholder="Vad tänker du på?" value="'+esc(cap.draft)+'" oninput="cap.draft=this.value;toggleExtra()" onkeydown="if(event.key===\'Enter\')addItem()">';
     if(cap.err==="denied")h+='<p class="warn">Mikrofonen blockerades. Tillåt mikrofon i webbläsaren och försök igen, eller skriv i fältet.</p>';
     if(cap.err==="nosupport")h+='<p class="warn">Röst stöds inte i den här webbläsaren — skriv i fältet istället.</p>';
-    if(cap.draft.trim()){
-      h+='<div id="extra" class="extra"><div class="crow"><span class="clbl">Det här är en</span><button class="pill '+(cap.kind==="task"?"on":"")+'" onclick="cap.kind=\'task\';render()">▸ Uppgift</button><button class="pill '+(cap.kind==="idea"?"on":"")+'" onclick="cap.kind=\'idea\';render()">💡 Idé</button></div>';
-      h+='<div class="crow"><span class="clbl">Lägg i</span><button class="pill '+(cap.dest==="inbox"?"on":"")+'" onclick="cap.dest=\'inbox\';render()">📥 Inkorg</button>';
-      s.projects.forEach(p=>{h+='<button class="pill '+(cap.dest===p.id?"on":"")+'" onclick="cap.dest=\''+p.id+'\';render()">'+esc(p.name)+'</button>'});
-      h+='</div><button class="addbtn" onclick="addItem()">＋ Lägg till</button></div>';
-    }
+    h+='<div id="extra" class="extra" style="'+(cap.draft.trim()?"":"display:none")+'"><div class="crow"><span class="clbl">Det här är en</span><button class="pill '+(cap.kind==="task"?"on":"")+'" onclick="cap.kind=\'task\';render()">▸ Uppgift</button><button class="pill '+(cap.kind==="idea"?"on":"")+'" onclick="cap.kind=\'idea\';render()">💡 Idé</button></div>';
+    h+='<div class="crow"><span class="clbl">Lägg i</span><button class="pill '+(cap.dest==="inbox"?"on":"")+'" onclick="cap.dest=\'inbox\';render()">📥 Inkorg</button>';
+    s.projects.forEach(p=>{h+='<button class="pill '+(cap.dest===p.id?"on":"")+'" onclick="cap.dest=\''+p.id+'\';render()">'+esc(p.name)+'</button>'});
+    h+='</div><button class="addbtn" onclick="addItem()">＋ Lägg till</button></div>';
     h+='</div>';
   }
 
