@@ -95,6 +95,20 @@ body{background:var(--bg);color:var(--ink);font-family:'Space Mono',monospace;mi
 .ioshint>span{flex:1;min-width:0}
 .ioshint .x{flex:none;background:none;border:none;color:var(--faint);font-size:20px;line-height:1;cursor:pointer;padding:2px 4px}
 .ioshint .inst{flex:none;background:var(--ember);color:#13100e;border:none;font-family:inherit;font-weight:700;font-size:13px;padding:9px 15px;border-radius:10px;cursor:pointer}
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:80;animation:fade .2s}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:81;background:var(--bg2);border-top:1px solid var(--line);border-radius:20px 20px 0 0;padding:20px 18px max(20px,env(safe-area-inset-bottom));max-width:620px;margin:0 auto;animation:slideup .25s}
+@keyframes slideup{from{transform:translateY(100%)}to{transform:none}}
+.sheet-t{font-family:'Fraunces',serif;font-size:18px;margin-bottom:16px}
+.sheet-row{display:flex;align-items:center;gap:12px}
+.smic{flex:none;width:52px;height:52px;border-radius:50%;border:none;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none;background:radial-gradient(circle at 30% 30%,#2c241e,#16110e);color:var(--ink);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px var(--line);transition:.2s}
+.smic svg{width:22px;height:22px}
+.smic.live{background:radial-gradient(circle at 30% 30%,#ff8a5c,var(--ember));color:#13100e;box-shadow:0 8px 24px -6px rgba(255,107,53,.6)}
+.sheet-f{flex:1;min-width:0;background:none;border:none;border-bottom:2px solid var(--line);outline:none;font-family:'Fraunces',serif;font-size:20px;color:var(--ink);padding:8px 2px}
+.sheet-f:focus{border-color:var(--ember)}.sheet-f::placeholder{color:var(--faint);font-style:italic}
+.sheet-hint{color:var(--amber);font-size:12px;margin-top:12px}
+.sheet-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
+.sheet-cancel{background:none;border:1px solid var(--line);color:var(--soft);font-family:inherit;font-size:14px;padding:11px 18px;border-radius:12px;cursor:pointer}
+.sheet-ok{background:var(--ember);color:#13100e;border:none;font-family:inherit;font-weight:700;font-size:14px;padding:11px 22px;border-radius:12px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -139,12 +153,19 @@ function uncomplete(id){const it=s.items.find(x=>x.id===id);if(it){it.done=false
 function removeItem(id){s.items=s.items.filter(x=>x.id!==id);save();render()}
 function promote(id){const it=s.items.find(x=>x.id===id);if(it){it.type="task";it.fromIdea=true;save();render()}}
 function addItem(){const t=cap.draft.trim();if(!t)return;s.items.push({id:uid(),projectId:cap.dest==="inbox"?null:cap.dest,type:cap.kind,title:t,done:false,createdAt:Date.now()});cap.draft="";cap.kind="task";save();render()}
-function addStep(taskId){const it=s.items.find(x=>x.id===taskId);if(!it)return;const title=(prompt("Vad ska steget heta?")||"").trim();if(!title)return;if(!it.steps)it.steps=[];it.steps.push({id:uid(),title,done:false});save();render()}
+function addStep(taskId){const it=s.items.find(x=>x.id===taskId);if(!it)return;openSheet("Ny deluppgift","",val=>{if(!it.steps)it.steps=[];it.steps.push({id:uid(),title:val,done:false});save();render()})}
 function removeStep(taskId,stepId){const it=s.items.find(x=>x.id===taskId);if(!it||!it.steps)return;it.steps=it.steps.filter(st=>st.id!==stepId);save();render()}
-function editItem(id){const it=s.items.find(x=>x.id===id);if(!it)return;const t=(prompt("Ändra texten:",it.title)||"").trim();if(!t)return;it.title=t;save();render()}
-function editStep(taskId,stepId){const it=s.items.find(x=>x.id===taskId);if(!it||!it.steps)return;const st=it.steps.find(x=>x.id===stepId);if(!st)return;const t=(prompt("Ändra steget:",st.title)||"").trim();if(!t)return;st.title=t;save();render()}
+function editItem(id){const it=s.items.find(x=>x.id===id);if(!it)return;openSheet("Ändra texten",it.title,val=>{it.title=val;save();render()})}
+function editStep(taskId,stepId){const it=s.items.find(x=>x.id===taskId);if(!it||!it.steps)return;const st=it.steps.find(x=>x.id===stepId);if(!st)return;openSheet("Ändra steget",st.title,val=>{st.title=val;save();render()})}
 function toggleStep(taskId,stepId){const it=s.items.find(x=>x.id===taskId);if(!it||!it.steps)return;const st=it.steps.find(x=>x.id===stepId);if(!st)return;st.done=!st.done;const row=document.getElementById("step_"+taskId+"_"+stepId);if(row){row.classList.toggle("done",st.done);const c=row.querySelector(".scheck");if(c){c.classList.toggle("on",st.done);c.textContent=st.done?"✓":""}}const dn=it.steps.filter(x=>x.done).length;const pr=document.getElementById("prog_"+taskId);if(pr){pr.textContent=dn+"/"+it.steps.length;pr.classList.toggle("all",dn===it.steps.length&&dn>0)}save()}
-function addProject(){const name=(prompt("Vad heter projektet?")||"").trim();if(!name)return;const id=uid();s.projects.push({id,name,createdAt:Date.now()});s.cur=id;s.view="detail";save();render()}
+function addProject(){openSheet("Nytt projekt","",val=>{const id=uid();s.projects.push({id,name:val,createdAt:Date.now()});s.cur=id;s.view="detail";save();render()})}
+let sheet=null;
+function makeRec(onText,onState){if(!Recog)return null;const r=new Recog();r.lang="sv-SE";r.interimResults=true;r.continuous=true;let fin="";r.onresult=e=>{let int="";for(let i=e.resultIndex;i<e.results.length;i++){const tr=e.results[i][0].transcript;if(e.results[i].isFinal)fin+=tr+" ";else int+=tr}onText((fin+int).replace(/\s+/g," ").trim())};r.onerror=e=>{if(e.error==="not-allowed"||e.error==="service-not-allowed"){r.want=false;onState(false,"denied")}};r.onend=()=>{if(r.want){try{r.start();return}catch(e){}}onState(false)};return r}
+function openSheet(title,initial,onConfirm){closeSheet();sheet={onConfirm};const bg=document.createElement("div");bg.className="sheet-bg";bg.id="sheetbg";bg.onclick=closeSheet;const el=document.createElement("div");el.className="sheet";el.id="sheet";el.innerHTML='<div class="sheet-t">'+esc(title)+'</div><div class="sheet-row"><button class="smic" id="smic" oncontextmenu="return false">'+MIC+'</button><input id="sheetfield" class="sheet-f" placeholder="Skriv eller håll mic…"></div><p class="sheet-hint" id="sheethint" style="display:none"></p><div class="sheet-actions"><button class="sheet-cancel">Avbryt</button><button class="sheet-ok">Klar</button></div>';document.body.appendChild(bg);document.body.appendChild(el);const inp=el.querySelector("#sheetfield");inp.value=initial||"";inp.onkeydown=e=>{if(e.key==="Enter")confirmSheet()};el.querySelector(".sheet-cancel").onclick=closeSheet;el.querySelector(".sheet-ok").onclick=confirmSheet;const mic=el.querySelector("#smic");mic.addEventListener("pointerdown",sheetVoiceDown);mic.addEventListener("pointerup",sheetVoiceUp);mic.addEventListener("pointerleave",sheetVoiceUp);mic.addEventListener("pointercancel",sheetVoiceUp)}
+function sheetVoiceDown(e){e.preventDefault();if(rec)return;const inp=document.getElementById("sheetfield");if(!inp)return;const base=inp.value.trim();const mic=document.getElementById("smic");rec=makeRec(text=>{inp.value=(base?base+" ":"")+text},(listening,err)=>{if(mic)mic.classList.toggle("live",listening);if(!listening)rec=null;if(err){const h=document.getElementById("sheethint");if(h){h.textContent="Mikrofonen blockerades — skriv i fältet i stället.";h.style.display=""}}});if(!rec){const h=document.getElementById("sheethint");if(h){h.textContent="Röst stöds inte här — skriv i fältet.";h.style.display=""}return}rec.want=true;if(mic)mic.classList.add("live");try{rec.start()}catch(e2){}}
+function sheetVoiceUp(e){if(e)e.preventDefault();if(rec){rec.want=false;try{rec.stop()}catch(e2){}}}
+function confirmSheet(){const inp=document.getElementById("sheetfield");if(!inp)return;const v=inp.value.trim();const cb=sheet&&sheet.onConfirm;closeSheet();if(v&&cb)cb(v)}
+function closeSheet(){if(rec){rec.want=false;try{rec.stop()}catch(e){}rec=null}const bg=document.getElementById("sheetbg");if(bg)bg.remove();const el=document.getElementById("sheet");if(el)el.remove();sheet=null}
 function removeProject(id){s.projects=s.projects.filter(p=>p.id!==id);s.items.forEach(x=>{if(x.projectId===id)x.projectId=null});s.view="list";save();render()}
 function go(v){s.view=v;if(v==="capture"){cap.draft="";cap.err=""}render()}
 function openProj(id){s.cur=id;s.view="detail";render()}
