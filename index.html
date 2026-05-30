@@ -102,6 +102,10 @@ body.draglock{overflow:hidden;touch-action:none;overscroll-behavior:none}
 .addstep:hover{color:var(--idea)}
 .addhere{display:inline-flex;align-items:center;gap:6px;background:none;border:1px dashed var(--line);color:var(--soft);font-family:inherit;font-size:13px;cursor:pointer;padding:9px 14px;border-radius:12px;margin-top:10px;transition:.15s}
 .addhere:hover{border-color:var(--soft);color:var(--ink)}
+.act.adding{align-items:center}
+.addghost{flex:none;width:24px;height:24px;border-radius:7px;border:2px dashed var(--faint);opacity:.5}
+.addinput{flex:1;min-width:0;background:none;border:none;outline:none;color:var(--ink);font-family:inherit;font-size:15px;padding:2px 0;line-height:1.5}
+.addinput::placeholder{color:var(--faint);font-style:italic}
 .burst{position:absolute;inset:0;pointer-events:none}
 .burst i{position:absolute;top:50%;left:50%;width:5px;height:5px;border-radius:50%;background:var(--amber);transform:translate(-50%,-50%);animation:spark var(--d) ease-out forwards}
 .burst i.big{background:var(--ember);box-shadow:0 0 6px var(--ember)}
@@ -138,7 +142,7 @@ body.draglock{overflow:hidden;touch-action:none;overscroll-behavior:none}
 <div id="app"></div>
 <script>
 const KEY="nu-projekt-v1";
-const VER="1.13";
+const VER="1.14";
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const isoD=d=>d.toISOString().slice(0,10);
 const today=()=>isoD(new Date());
@@ -151,6 +155,7 @@ let loadError=false;
 let capMsg="";
 let drag=null,suppressOpen=false;
 let actionsCollapsed=true;
+let actionAdding=false,actionFlushing=false;
 
 function seedIfEmpty(){
   s.projects=[{id:"p_studie",name:"StudiePlan",createdAt:Date.now()}];
@@ -182,7 +187,18 @@ function addStep(taskId){const it=s.items.find(x=>x.id===taskId);if(!it)return;o
 function removeStep(taskId,stepId){const it=s.items.find(x=>x.id===taskId);if(!it||!it.steps)return;it.steps=it.steps.filter(st=>st.id!==stepId);save();render()}
 function editItem(id){const it=s.items.find(x=>x.id===id);if(!it)return;openSheet("Ändra texten",it.title,val=>{it.title=val;save();render()})}
 function editStep(taskId,stepId){const it=s.items.find(x=>x.id===taskId);if(!it||!it.steps)return;const st=it.steps.find(x=>x.id===stepId);if(!st)return;openSheet("Ändra steget",st.title,val=>{st.title=val;save();render()})}
-function addAction(){openSheet("Post i listan","",val=>{s.actions.push({id:uid(),title:val,done:false,createdAt:Date.now()});save();render()})}
+function startActionAdd(){actionAdding=true;render();focusActionAdd()}
+function focusActionAdd(){setTimeout(()=>{const f=document.getElementById("actionadd");if(f)try{f.focus()}catch(e){}},50)}
+function actionAddKey(e){if(e.key==="Enter"){e.preventDefault();const f=document.getElementById("actionadd");flushActionAdd(!!(f&&f.value.trim()))}else if(e.key==="Escape"){const f=document.getElementById("actionadd");if(f)f.value="";flushActionAdd(false)}}
+// Lägger inline (Keep-stil): commit:ar fältets text och håller fältet öppet för nästa post.
+// actionFlushing-vakten hindrar att blur-eventet (som triggas när render byter ut fältet) committar dubbelt.
+function flushActionAdd(keepOpen){
+  if(actionFlushing)return;actionFlushing=true;
+  const f=document.getElementById("actionadd");const v=f?f.value.trim():"";
+  if(v){s.actions.push({id:uid(),title:v,done:false,createdAt:Date.now()});save()}
+  actionAdding=keepOpen;render();if(keepOpen)focusActionAdd();
+  setTimeout(()=>{actionFlushing=false},60);
+}
 function editAction(id){const a=s.actions.find(x=>x.id===id);if(!a)return;openSheet("Ändra texten",a.title,val=>{a.title=val;save();render()})}
 function removeAction(id){s.actions=s.actions.filter(x=>x.id!==id);save();render()}
 function clearDoneActions(){s.actions=s.actions.filter(a=>!a.done);save();render()}
@@ -201,7 +217,7 @@ function exportData(){const payload={app:"ToDoNu",ver:VER,exportedAt:Date.now(),
 function pickImport(){const inp=document.createElement("input");inp.type="file";inp.accept="application/json,.json";inp.onchange=()=>{if(inp.files&&inp.files[0])importData(inp.files[0])};inp.click()}
 function importData(file){const r=new FileReader();r.onload=()=>{let d;try{const parsed=JSON.parse(r.result);d=parsed&&parsed.data?parsed.data:parsed}catch(e){alert("Kunde inte läsa filen – är det en ToDoNu-backup?");return}if(!d||!Array.isArray(d.projects)){alert("Filen ser inte ut som en ToDoNu-backup.");return}if(!confirm("Importera ersätter all data på den här enheten. Fortsätt?"))return;s.projects=d.projects;s.items=Array.isArray(d.items)?d.items:[];s.actions=Array.isArray(d.actions)?d.actions:[];s.stats=Object.assign({streak:0,lastActive:"",todayDate:"",todayCount:0,ideasRealized:0},d.stats||{});loadError=false;s.view="list";s.cur=null;save();render()};r.onerror=()=>alert("Kunde inte läsa filen.");r.readAsText(file)}
 function exportRaw(){const raw=localStorage.getItem(KEY+"-korrupt")||"";const blob=new Blob([raw],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="todonu-rakopia-"+today()+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)}
-function go(v){capMsg="";s.view=v;if(v==="capture"){cap.draft="";render();setTimeout(()=>{const f=document.getElementById("field");if(f)try{f.focus()}catch(e){}},60);return}render()}
+function go(v){capMsg="";actionAdding=false;s.view=v;if(v==="capture"){cap.draft="";render();setTimeout(()=>{const f=document.getElementById("field");if(f)try{f.focus()}catch(e){}},60);return}render()}
 function openProj(id){if(suppressOpen)return;s.cur=id;s.view="detail";render()}
 
 function toggleExtra(){const el=document.getElementById("extra");if(el)el.style.display=cap.draft.trim()?"":"none"}
@@ -270,7 +286,8 @@ function render(){
   if(s.view==="action"){
     const aopen=s.actions.filter(a=>!a.done);const adone=s.actions.filter(a=>a.done);
     h+='<div class="body"><div class="dhead"><h1>Handlingslista</h1></div>';
-    h+='<button class="addhere" onclick="addAction()">＋ Post i listan</button>';
+    if(actionAdding)h+='<div class="item act adding"><span class="addghost"></span><input id="actionadd" class="addinput" placeholder="Skriv en post…" autocomplete="off" onkeydown="actionAddKey(event)" onblur="flushActionAdd(false)"></div>';
+    else h+='<button class="addhere" onclick="startActionAdd()">＋ Post i listan</button>';
     h+='<div id="actionlist">';
     if(aopen.length===0)h+='<p class="emptyline">Inget kvar att göra.</p>';
     aopen.forEach(a=>{h+='<div class="item act" data-aid="'+a.id+'"><button class="check" onclick="toggleAction(\''+a.id+'\')"></button><div class="icontent"><span class="ititle clampable clamp" onclick="editAction(\''+a.id+'\')">'+esc(a.title)+'</span><button class="moretoggle" hidden onclick="toggleMore(this)">visa mer</button></div><span class="grip" title="Dra för att flytta" aria-label="Flytta post" onclick="event.stopPropagation()">≡</span><button class="del" onclick="removeAction(\''+a.id+'\')">🗑</button></div>'});
