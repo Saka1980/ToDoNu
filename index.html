@@ -89,6 +89,8 @@ body.draglock{overflow:hidden;touch-action:none;overscroll-behavior:none}
 .promote:hover{border-color:var(--idea)}
 .del{flex:none;display:flex;align-items:center;justify-content:center;width:38px;height:38px;background:none;border:none;color:var(--faint);cursor:pointer;font-size:15px;border-radius:11px}
 .del:hover{color:var(--ember)}
+.move{flex:none;display:flex;align-items:center;justify-content:center;width:38px;height:38px;background:none;border:none;color:var(--faint);cursor:pointer;font-size:14px;border-radius:11px}
+.move:hover{color:var(--amber)}
 .prog{flex:none;font-size:11px;color:var(--faint);margin:9px 0 0 4px}.prog.all{color:var(--green)}
 .steps{margin:0 0 12px 36px;display:flex;flex-direction:column}
 .step{display:flex;align-items:flex-start;gap:10px;padding:7px 2px;animation:fade .2s}
@@ -136,6 +138,9 @@ body.draglock{overflow:hidden;touch-action:none;overscroll-behavior:none}
 .sheet-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
 .sheet-cancel{background:none;border:1px solid var(--line);color:var(--soft);font-family:inherit;font-size:14px;padding:11px 18px;border-radius:12px;cursor:pointer}
 .sheet-ok{background:var(--ember);color:#13100e;border:none;font-family:inherit;font-weight:700;font-size:14px;padding:11px 22px;border-radius:12px;cursor:pointer}
+.pickrows{display:flex;flex-direction:column;gap:8px;margin-top:6px;max-height:50vh;overflow:auto}
+.pickrow{text-align:left;background:var(--bg2);border:1px solid var(--line);color:var(--ink);font-family:inherit;font-size:15px;padding:13px 15px;border-radius:12px;cursor:pointer;transition:.15s}
+.pickrow:hover{border-color:var(--soft)}
 </style>
 </head>
 <body>
@@ -232,6 +237,9 @@ function growField(el){if(!el)return;el.style.height="auto";el.style.height=el.s
 function openSheet(title,initial,onConfirm){closeSheet();sheet={onConfirm};const bg=document.createElement("div");bg.className="sheet-bg";bg.id="sheetbg";bg.onclick=closeSheet;const el=document.createElement("div");el.className="sheet";el.id="sheet";el.innerHTML='<div class="sheet-t">'+esc(title)+'</div><div class="sheet-row"><textarea id="sheetfield" class="sheet-f" rows="1" placeholder="Skriv eller diktera…"></textarea></div><div class="sheet-actions"><button class="sheet-cancel">Avbryt</button><button class="sheet-ok">Klar</button></div>';document.body.appendChild(bg);document.body.appendChild(el);const inp=el.querySelector("#sheetfield");inp.value=initial||"";inp.oninput=()=>growField(inp);inp.onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();confirmSheet()}};setTimeout(()=>{try{inp.focus()}catch(e){};growField(inp)},60);el.querySelector(".sheet-cancel").onclick=closeSheet;el.querySelector(".sheet-ok").onclick=confirmSheet}
 function confirmSheet(){const inp=document.getElementById("sheetfield");if(!inp)return;const v=inp.value.trim();const cb=sheet&&sheet.onConfirm;closeSheet();if(v&&cb)cb(v)}
 function closeSheet(){const bg=document.getElementById("sheetbg");if(bg)bg.remove();const el=document.getElementById("sheet");if(el)el.remove();sheet=null}
+// Val-panel (återanvänder sheet-chrome): lista med mål-knappar istället för textfält.
+function openPicker(title,options,onPick){closeSheet();const bg=document.createElement("div");bg.className="sheet-bg";bg.id="sheetbg";bg.onclick=closeSheet;const el=document.createElement("div");el.className="sheet";el.id="sheet";let inner='<div class="sheet-t">'+esc(title)+'</div><div class="pickrows">';options.forEach((o,i)=>{inner+='<button class="pickrow" data-i="'+i+'">'+esc(o.label)+'</button>'});inner+='</div><div class="sheet-actions"><button class="sheet-cancel">Avbryt</button></div>';el.innerHTML=inner;document.body.appendChild(bg);document.body.appendChild(el);el.querySelectorAll(".pickrow").forEach(b=>{b.onclick=()=>{const i=+b.dataset.i;closeSheet();onPick(options[i].val)}});el.querySelector(".sheet-cancel").onclick=closeSheet}
+function moveItem(id){const it=s.items.find(x=>x.id===id);if(!it)return;const opts=s.projects.map(p=>({label:p.name,val:p.id}));if(!opts.length){alert("Skapa ett projekt först.");return}openPicker("Flytta till projekt",opts,val=>{it.projectId=val;save();render()})}
 function removeProject(id){s.projects=s.projects.filter(p=>p.id!==id);s.items.forEach(x=>{if(x.projectId===id)x.projectId=null});s.view="list";save();render()}
 function exportData(){const payload={app:"ToDoNu",ver:VER,exportedAt:Date.now(),data:{projects:s.projects,items:s.items,actions:s.actions,stats:s.stats}};const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="todonu-backup-"+today()+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)}
 function pickImport(){const inp=document.createElement("input");inp.type="file";inp.accept="application/json,.json";inp.onchange=()=>{if(inp.files&&inp.files[0])importData(inp.files[0])};inp.click()}
@@ -289,7 +297,7 @@ function render(){
     if(tasks.filter(t=>!t.done).length===0)h+='<p class="emptyline">Inga öppna uppgifter.</p>';
     tasks.filter(t=>!t.done).forEach(t=>{
       const hasSteps=t.steps&&t.steps.length>0;const dn=hasSteps?t.steps.filter(x=>x.done).length:0;
-      h+='<div class="item"><button class="check" id="chk_'+t.id+'" onclick="completeTask(\''+t.id+'\')"></button><div class="icontent">'+(isEdit("item",t.id)?inlineField():'<span class="ititle clampable clamp" onclick="startEdit(\'item\',\''+t.id+'\')">'+esc(t.title)+(t.fromIdea?'<span class="fromidea">💡</span>':'')+'</span><button class="moretoggle" hidden onclick="toggleMore(this)">visa mer</button>')+'</div>'+(hasSteps?'<span class="prog" id="prog_'+t.id+'">'+dn+'/'+t.steps.length+'</span>':'')+'<button class="del" onclick="removeItem(\''+t.id+'\')">🗑</button></div>';
+      h+='<div class="item"><button class="check" id="chk_'+t.id+'" onclick="completeTask(\''+t.id+'\')"></button><div class="icontent">'+(isEdit("item",t.id)?inlineField():'<span class="ititle clampable clamp" onclick="startEdit(\'item\',\''+t.id+'\')">'+esc(t.title)+(t.fromIdea?'<span class="fromidea">💡</span>':'')+'</span><button class="moretoggle" hidden onclick="toggleMore(this)">visa mer</button>')+'</div>'+(hasSteps?'<span class="prog" id="prog_'+t.id+'">'+dn+'/'+t.steps.length+'</span>':'')+(isInbox?'<button class="move" title="Flytta till projekt" onclick="moveItem(\''+t.id+'\')">📁</button>':'')+'<button class="del" onclick="removeItem(\''+t.id+'\')">🗑</button></div>';
       h+='<div class="steps" id="steps_'+t.id+'">';
       if(hasSteps)t.steps.forEach(st=>{h+='<div class="step'+(st.done?' done':'')+'" id="step_'+t.id+'_'+st.id+'"><button class="scheck'+(st.done?' on':'')+'" onclick="toggleStep(\''+t.id+'\',\''+st.id+'\')">'+(st.done?'✓':'')+'</button><div class="icontent"><span class="stitle clampable clamp" onclick="editStep(\''+t.id+'\',\''+st.id+'\')">'+esc(st.title)+'</span><button class="moretoggle" hidden onclick="toggleMore(this)">visa mer</button></div><button class="sdel" onclick="removeStep(\''+t.id+'\',\''+st.id+'\')">×</button></div>'});
       h+='<button class="addstep" onclick="addStep(\''+t.id+'\')">＋ steg</button></div>';
@@ -301,14 +309,14 @@ function render(){
       h+='<button class="donehead" onclick="toggleDoneCollapse()">'+(doneCollapsed?'▸':'▾')+' Klart ('+doneTasks.length+')</button>';
       if(!doneCollapsed){
         h+='<div class="donegroup">';
-        doneTasks.forEach(t=>{h+='<div class="item done"><button class="check on" onclick="uncomplete(\''+t.id+'\')">✓</button><div class="icontent">'+(isEdit("item",t.id)?inlineField():'<span class="ititle clampable clamp" onclick="startEdit(\'item\',\''+t.id+'\')">'+esc(t.title)+'</span><button class="moretoggle" hidden onclick="toggleMore(this)">visa mer</button>')+'</div><button class="del" onclick="removeItem(\''+t.id+'\')">🗑</button></div>'});
+        doneTasks.forEach(t=>{h+='<div class="item done"><button class="check on" onclick="uncomplete(\''+t.id+'\')">✓</button><div class="icontent">'+(isEdit("item",t.id)?inlineField():'<span class="ititle clampable clamp" onclick="startEdit(\'item\',\''+t.id+'\')">'+esc(t.title)+'</span><button class="moretoggle" hidden onclick="toggleMore(this)">visa mer</button>')+'</div>'+(isInbox?'<button class="move" title="Flytta till projekt" onclick="moveItem(\''+t.id+'\')">📁</button>':'')+'<button class="del" onclick="removeItem(\''+t.id+'\')">🗑</button></div>'});
         h+='<button class="tlink" onclick="clearDoneTasks()">Rensa klart</button>';
         h+='</div>';
       }
     }
     h+='</div><div class="stream"><div class="shead idea">💡 Idéer</div>';
     if(ideas.length===0)h+='<p class="emptyline">Inga idéer än.</p>';
-    ideas.forEach(t=>{h+='<div class="item idea"><span class="ideadot"></span><div class="icontent">'+(isEdit("item",t.id)?inlineField():'<span class="ititle clampable clamp" onclick="startEdit(\'item\',\''+t.id+'\')">'+esc(t.title)+'</span><button class="moretoggle" hidden onclick="toggleMore(this)">visa mer</button>')+'</div><button class="promote" title="Gör till uppgift" onclick="promote(\''+t.id+'\')">→</button><button class="del" onclick="removeItem(\''+t.id+'\')">🗑</button></div>'});
+    ideas.forEach(t=>{h+='<div class="item idea"><span class="ideadot"></span><div class="icontent">'+(isEdit("item",t.id)?inlineField():'<span class="ititle clampable clamp" onclick="startEdit(\'item\',\''+t.id+'\')">'+esc(t.title)+'</span><button class="moretoggle" hidden onclick="toggleMore(this)">visa mer</button>')+'</div>'+(isInbox?'<button class="move" title="Flytta till projekt" onclick="moveItem(\''+t.id+'\')">📁</button>':'')+'<button class="promote" title="Gör till uppgift" onclick="promote(\''+t.id+'\')">→</button><button class="del" onclick="removeItem(\''+t.id+'\')">🗑</button></div>'});
     if(isAdd("idea"))h+='<div class="item idea adding"><span class="ideadot"></span>'+inlineField("Skriv en idé…")+'</div>';
     else h+='<button class="addhere" onclick="startAdd(\'idea\')">＋ idé</button>';
     h+='</div></div>';
