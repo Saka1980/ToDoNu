@@ -2,18 +2,21 @@
 
 > Pending idéer och öppna frågor. Läs den här vid sessionsstart. Lägg till nya idéer direkt när de dyker upp. När en idé byggs → flytta till `LOG.md` och uppdatera `STATUS.md`.
 
-**Senast uppdaterad:** 2026-05-29
+**Senast uppdaterad:** 2026-05-30
 
 ## Öppna frågor (kräver beslut)
 
-- **Räcker in-app morgonhälsningen?** Steg 1 (in-app kort vid appöppning) är byggt. Det *påminner* inte aktivt — man måste öppna appen. Om det inte räcker: gå vidare till Periodic Background Sync (se nedan). Avvakta ägarens upplevelse.
+- ~~**Räcker in-app morgonhälsningen?**~~ **Avgjort 2026-05-30: ja, den räcker.** Ägaren nöjd med in-app-kortet vid appöppning. Aktiv notis (Periodic Background Sync) byggs inte — roadmap-punkt 2 stängd.
 - **Konto/synk — behövs det, eller räcker lokalt per enhet?** Utlöser i så fall arkitektur-tripwiren → Vite + ev. Supabase.
 - **Ska inline-panelen stanna öppen för flera tillägg?** Idag (v1.8) stänger panelen efter varje `＋ uppgift`/`＋ idé` i projekt/inkorg (ägarens val "panel underifrån"). Om man ofta vill lägga flera i rad på samma ställe kan den hållas öppen och återfokusera. Avvakta ägarens upplevelse.
 
 ## Roadmap-idéer (ej byggda)
 
-- **Riktig morgonnotis** (roadmap-punkt 2, steg 2) — **Periodic Background Sync** + lokal notis via service worker. Ingen backend, funkar på installerad PWA på Android/Pixel. Nackdel: tidpunkt ungefärlig (Chrome bestämmer, min ~12h), kräver notis-permission. Steg 3 = web push + cron-backend för exakt tid (väcker arkitektur-tripwiren).
 - **Synk mellan enheter** (roadmap-punkt 5) — idag är allt lokalt per enhet.
+
+## Avgjorda / lagda åt sidan
+
+- ~~**Riktig morgonnotis** (roadmap-punkt 2, steg 2)~~ — **lagd åt sidan 2026-05-30.** In-app-hälsningen räcker enligt ägaren. (Om beslutet ändras: Periodic Background Sync + lokal notis i service worker — ingen backend, funkar på Pixel, men ungefärlig tid och kräver notis-permission. Web push + cron-backend ger exakt tid men väcker arkitektur-tripwiren.)
 
 ## Arkitektur-tripwire (bevaka, inte en idé att bygga nu)
 

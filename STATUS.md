@@ -30,7 +30,12 @@ Körbar, installerad och verifierad PWA på GitHub Pages. Vanilla JS (`index.htm
 
 ## Nästa steg
 
-1. **Riktig morgonnotis** (roadmap-punkt 2, steg 2) — om in-app-hälsningen inte räcker (den påminner bara när man öppnar appen): uppgradera till **Periodic Background Sync + lokal notis** (ingen backend, funkar på installerad PWA på Pixel; tidpunkt ungefärlig). Väg 3 = web push + cron-backend ger exakt tid men väcker arkitektur-tripwiren.
+Ingen funktion är i kö just nu. **Roadmap-punkt 2 (morgonnotis) är avgjord 2026-05-30: in-app-morgonhälsningen räcker — steg 2 (Periodic Background Sync + aktiv notis) byggs inte.** Kvarvarande kandidater, alla beroende av ägarens upplevelse (se `IDEAS.md`):
+
+- **Synk mellan enheter** (roadmap-punkt 5) — utlöser arkitektur-tripwiren → Vite + ev. Supabase.
+- **Inline-panelen kvar öppen** för flera tillägg i rad (liten UX-justering).
+
+Fråga ägaren vid nästa sessionsstart vad hen vill ta härnäst.
 
 ## Känd teknisk skuld
 

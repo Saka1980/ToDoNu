@@ -89,7 +89,7 @@ GitHub Pages från `main` / root. Live-URL: `https://<användarnamn>.github.io/<
 ## Roadmap (att göra)
 
 1. ~~**Riktig PWA**: `manifest.json` + service worker → installerbar, fungerar offline.~~ ✅ **KLAR 2026-05-29** — manifest, `sw.js`, PNG/maskable-ikoner, self-hostade typsnitt, iOS-hint, `storage.persist()`, namnbyte "Nu." → **ToDoNu**. Kvarstående risk: iOS kan ändå vakuumera `localStorage` efter ~7 dagars inaktivitet (riktig lösning = IndexedDB/synk).
-2. **Morgonnotis**: Notifications API via service worker. OBS: på iOS krävs installerad PWA och web push är begränsat — undersök lösning.
+2. ~~**Morgonnotis**: Notifications API via service worker.~~ **Steg 1 (in-app-hälsning) KLAR 2026-05-29. Steg 2 (aktiv notis) avgjort 2026-05-30: byggs inte — ägaren tycker in-app-hälsningen räcker.** (Om beslutet ändras: Periodic Background Sync + lokal notis, ingen backend, funkar på Pixel men ungefärlig tid; web push + cron-backend ger exakt tid men väcker arkitektur-tripwiren.)
 3. ~~**Bryt ut röst-till-text** som återanvändbar modul.~~ **Överspelad 2026-05-29:** in-app Web Speech togs bort (fungerade ej på ägarens telefon). Röst sker nu via tangentbordets diktering. En egen återanvändbar röst-modul kräver moln-STT (backend) om den ska funka på mobil.
 4. **Arkitekturbeslut** — *avgjort 2026-05-29: behåll vanilla nu + tripwire.* Migrera till **Vite-SPA** (ej full Next.js) först när någon tröskel slår till: (a) synk/flera enheter, (b) UI > ~3–4 vyer med delat interaktivt tillstånd, (c) upprepad kamp mot vanilla-renderingen. Tills dess: lös den enda svagheten (full `innerHTML`-omritning) med riktade DOM-uppdateringar, och bryt ut röst-modulen (punkt 3).
 5. **Synk mellan enheter** (idag är allt lokalt per enhet).
@@ -97,5 +97,4 @@ GitHub Pages från `main` / root. Live-URL: `https://<användarnamn>.github.io/<
 
 ## Öppna frågor
 
-- Hur lösa pålitlig morgonnotis, särskilt på iOS?
 - Behövs konto/synk, eller räcker lokalt per enhet? (Utlöser i så fall arkitektur-tripwiren → Vite + ev. Supabase.)
