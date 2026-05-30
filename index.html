@@ -77,6 +77,10 @@ body.draglock{overflow:hidden;touch-action:none;overscroll-behavior:none}
 .moretoggle:hover{color:var(--soft)}
 .fromidea{color:var(--idea);font-size:12px;margin-left:5px}
 .item.done .ititle{text-decoration:line-through;color:var(--faint)}
+.donehead{display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;border-top:1px solid var(--line);color:var(--faint);font-family:inherit;font-size:11px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;padding:16px 4px 8px;margin-top:10px;text-align:left}
+.donehead:hover{color:var(--soft)}
+.donegroup{animation:fade .2s}
+.donegroup .tlink{margin-top:10px}
 .ideadot{flex:none;width:9px;height:9px;border-radius:50%;background:var(--idea);margin:8px 0 0;box-shadow:0 0 8px rgba(125,180,196,.5)}
 .item.idea .ititle{color:#d8d0c2}
 .promote{flex:none;display:flex;align-items:center;justify-content:center;width:38px;height:38px;background:rgba(125,180,196,.12);border:1px solid transparent;color:var(--idea);font-size:19px;border-radius:11px;cursor:pointer;line-height:1}
@@ -176,6 +180,12 @@ function addStep(taskId){const it=s.items.find(x=>x.id===taskId);if(!it)return;o
 function removeStep(taskId,stepId){const it=s.items.find(x=>x.id===taskId);if(!it||!it.steps)return;it.steps=it.steps.filter(st=>st.id!==stepId);save();render()}
 function editItem(id){const it=s.items.find(x=>x.id===id);if(!it)return;openSheet("Ändra texten",it.title,val=>{it.title=val;save();render()})}
 function editStep(taskId,stepId){const it=s.items.find(x=>x.id===taskId);if(!it||!it.steps)return;const st=it.steps.find(x=>x.id===stepId);if(!st)return;openSheet("Ändra steget",st.title,val=>{st.title=val;save();render()})}
+function addAction(){openSheet("Post i listan","",val=>{s.actions.push({id:uid(),title:val,done:false,createdAt:Date.now()});save();render()})}
+function editAction(id){const a=s.actions.find(x=>x.id===id);if(!a)return;openSheet("Ändra texten",a.title,val=>{a.title=val;save();render()})}
+function removeAction(id){s.actions=s.actions.filter(x=>x.id!==id);save();render()}
+function clearDoneActions(){s.actions=s.actions.filter(a=>!a.done);save();render()}
+function toggleActionsCollapse(){actionsCollapsed=!actionsCollapsed;render()}
+function toggleAction(id){const a=s.actions.find(x=>x.id===id);if(!a)return;a.done=!a.done;if(a.done)a.completedAt=Date.now();else delete a.completedAt;save();render()}
 function toggleStep(taskId,stepId){const it=s.items.find(x=>x.id===taskId);if(!it||!it.steps)return;const st=it.steps.find(x=>x.id===stepId);if(!st)return;st.done=!st.done;const row=document.getElementById("step_"+taskId+"_"+stepId);if(row){row.classList.toggle("done",st.done);const c=row.querySelector(".scheck");if(c){c.classList.toggle("on",st.done);c.textContent=st.done?"✓":""}}const dn=it.steps.filter(x=>x.done).length;const pr=document.getElementById("prog_"+taskId);if(pr){pr.textContent=dn+"/"+it.steps.length;pr.classList.toggle("all",dn===it.steps.length&&dn>0)}save()}
 function addProject(){openSheet("Nytt projekt","",val=>{const id=uid();s.projects.push({id,name:val,createdAt:Date.now()});s.cur=id;s.view="detail";save();render()})}
 function addHere(kind){const pid=s.cur==="inbox"?null:s.cur;openSheet(kind==="idea"?"Ny idé":"Ny uppgift","",val=>{s.items.push({id:uid(),projectId:pid,type:kind,title:val,done:false,createdAt:Date.now()});save();render()})}
@@ -253,6 +263,26 @@ function render(){
     ideas.forEach(t=>{h+='<div class="item idea"><span class="ideadot"></span><div class="icontent"><span class="ititle clampable clamp" onclick="editItem(\''+t.id+'\')">'+esc(t.title)+'</span><button class="moretoggle" hidden onclick="toggleMore(this)">visa mer</button></div><button class="promote" title="Gör till uppgift" onclick="promote(\''+t.id+'\')">→</button><button class="del" onclick="removeItem(\''+t.id+'\')">🗑</button></div>'});
     h+='<button class="addhere" onclick="addHere(\'idea\')">＋ idé</button>';
     h+='</div></div>';
+  }
+
+  if(s.view==="action"){
+    const aopen=s.actions.filter(a=>!a.done);const adone=s.actions.filter(a=>a.done);
+    h+='<div class="body"><div class="dhead"><h1>Handlingslista</h1></div>';
+    h+='<button class="addhere" onclick="addAction()">＋ Post i listan</button>';
+    h+='<div id="actionlist">';
+    if(aopen.length===0)h+='<p class="emptyline">Inget kvar att göra.</p>';
+    aopen.forEach(a=>{h+='<div class="item act" data-aid="'+a.id+'"><button class="check" onclick="toggleAction(\''+a.id+'\')"></button><div class="icontent"><span class="ititle clampable clamp" onclick="editAction(\''+a.id+'\')">'+esc(a.title)+'</span><button class="moretoggle" hidden onclick="toggleMore(this)">visa mer</button></div><span class="grip" title="Dra för att flytta" aria-label="Flytta post" onclick="event.stopPropagation()">≡</span><button class="del" onclick="removeAction(\''+a.id+'\')">🗑</button></div>'});
+    h+='</div>';
+    if(adone.length>0){
+      h+='<button class="donehead" onclick="toggleActionsCollapse()">'+(actionsCollapsed?'▸':'▾')+' '+adone.length+' markerade objekt</button>';
+      if(!actionsCollapsed){
+        h+='<div class="donegroup">';
+        adone.forEach(a=>{h+='<div class="item act done"><button class="check on" onclick="toggleAction(\''+a.id+'\')">✓</button><div class="icontent"><span class="ititle clampable clamp" onclick="editAction(\''+a.id+'\')">'+esc(a.title)+'</span><button class="moretoggle" hidden onclick="toggleMore(this)">visa mer</button></div><button class="del" onclick="removeAction(\''+a.id+'\')">🗑</button></div>'});
+        h+='<button class="tlink" onclick="clearDoneActions()">Rensa avbockade</button>';
+        h+='</div>';
+      }
+    }
+    h+='</div>';
   }
 
   if(s.view==="capture"){
