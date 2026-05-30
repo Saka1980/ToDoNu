@@ -2,7 +2,7 @@
 
 > Pending idéer och öppna frågor. Läs den här vid sessionsstart. Lägg till nya idéer direkt när de dyker upp. När en idé byggs → flytta till `LOG.md` och uppdatera `STATUS.md`.
 
-**Senast uppdaterad:** 2026-05-30
+**Senast uppdaterad:** 2026-05-30 (efter Handlingslistan, v1.13)
 
 ## Öppna frågor (kräver beslut)
 

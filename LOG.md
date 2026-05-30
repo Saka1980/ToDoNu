@@ -4,6 +4,24 @@ Kronologisk logg över vad vi byggt och *varför*. Nyaste överst när nya rader
 
 ---
 
+## 2026-05-30 — Åttonde sessionen (Handlingslista — Keep-liknande checklista)
+
+Ägaren ville ha en **super-simpel, Google Keep-liknande checklista** ("Handlingslista"), placerad under Inkorg på framsidan. Designen togs fram via intervju + en referensbild från ägaren (en Keep-inköpslista).
+
+- **Bekräftade beslut (intervju):** EN enda lista (fast namn), bockbara punkter, **helt fristående** (rör inte Glöd/streak), kort under Inkorg som öppnar **egen vy**, kortet **alltid synligt** ("X kvar"/"Tom"), avbockning **exakt som Keep** (genomstruket + sjunker under hopfällbar "X markerade objekt"), **både** × per rad och "Rensa avbockade", **redigera (klick) + dra-ordna**.
+- **Datamodell:** ny fristående array `s.actions=[]` med `{id,title,done,createdAt,completedAt?}`. Bakåtkompatibelt (saknat fält → `[]`). Persisterad på **fyra ställen**: `load`/`save`/`exportData`/`importData` (annars ingår den inte i säkerhetskopian). Ordningen ligger implicit i arrayen (som `s.projects`).
+- **Byggt (allt i `index.html`), vertikalt i fem commits:**
+  1. Datamodell + persistens.
+  2. Kort på framsidan (mellan Inkorg-kort och "Projekt"-rubrik, alltid synligt) + bakåtknappen utökad för `view==="action"`.
+  3. Vyn `s.view==="action"`: "＋ Post i listan", öppna rader (bockbara/redigerbara/raderbara), hopfällbar markerade-grupp, "Rensa avbockade". Funktioner `addAction/editAction/removeAction/clearDoneActions/toggleActionsCollapse` + **tyst** `toggleAction` (modellerad på `toggleStep`, *inte* `completeTask` — ingen `chime`/`bumpStreak`/`todayCount`). Ny CSS `.donehead`/`.donegroup`; genomstruket återanvänt från `.item.done .ititle`.
+  4. **Drag generaliserat:** `setupProjectDrag`→`setupDrag` binder både `#projlist` och `#actionlist`; `onListPointerDown` fick selektor `.proj,.act` + `drag.listId` + `slotH` per lista (`.item` saknar `margin-bottom`, `.cardbtn` har 10px). `gripUp` grenar på `listId`: actionlist ordnar om bland de *öppna* posterna (de enda som renderas) och konkatenerar avbockade sist; projlist oförändrat. Ny CSS `.act`/`.act.dragging` (helkant, eftersom `.item` bara har border-bottom).
+  5. `VER` 1.12→1.13, `sw.js`-cache `todonu-v6`→`todonu-v7`, dokumentation.
+- **Verifiering (riktig Chrome, CDP — före push):** drev headless Chrome via DevTools-protokollet (Node 24:s inbyggda `WebSocket`/`fetch`, appen serverad över lokal http så `localStorage`/reload speglar verkligheten, riktiga muspekar-event för drag). **23 assertions, alla gröna:** kort syns/öppnar vy, tre tillägg via sheet, **tyst avbockning (stats bevisat oförändrade)**, regruppering till markerade + genomstruket, hopfälld-by-default + expandera, ångra, redigera, radera (×), "Rensa avbockade", dra-ned-omordning, **reload-persistens**, och **regression: projektdraget flyttar fortfarande**. Inga JS-exceptions/console-fel. Engångsskriptet raderat efteråt.
+  - *Process-not:* en första "FAIL" på projektdrag-regressionen var ett **testartefakt** — med standard headless-viewport (800×600) hamnade projektgreppen utanför skärmen så `dispatchMouseEvent` träffade inget; löst genom hög mobil-viewport (412×2200) via `Emulation.setDeviceMetricsOverride`. Den delade rörelse-logiken var korrekt hela tiden. (Lärdom kvarstår: verifiera *beteende* i riktig browser före push — gjordes denna gång.)
+- **Arkitektur-not:** detta blev appens 4:e vy → tangerar tripwire-tröskel (b). Action-vyn delar dock inte interaktivt tillstånd med övriga → medvetet kvar i vanilla. **Nästa vy-tillägg bör trigga omtag om Vite-SPA** (se STATUS.md).
+
+---
+
 ## 2026-05-30 — Sjunde sessionen (dra-och-släpp-ordning på projekt)
 
 Ägaren ville kunna **hålla i och flytta projekt upp/ned** — dra-och-släpp för att ändra ordningen i projektlistan.

@@ -31,6 +31,8 @@ Det är medvetet **inte**: en kalender, en sträng deadline-app, eller en funkti
 
 **Inkorg** — snabb-dumpa utan att välja projekt, sortera senare. Man kan också lägga direkt i ett projekt vid fångst.
 
+**Handlingslista** — *byggd 2026-05-30 (v1.13).* En super-simpel Google Keep-liknande checklista, **helt fristående** från projekt/uppgifter/idéer. EN enda lista (fast namn "Handlingslista"), nås via ett kort under Inkorg på framsidan (alltid synligt, undertext "X kvar"/"Tom"), öppnar en egen vy (`s.view==="action"`). Bockbara punkter; avbockade får genomstruken text och sjunker ner under en hopfällbar rubrik "X markerade objekt" (Keep-stil). "＋ Post i listan" lägger till, klick på text redigerar (`openSheet`), `≡` drar för att ordna om (samma drag-motor som projektlistan), × raderar en rad och "Rensa avbockade" tömmer alla klara. **Avbockning är tyst** — rör inte Glöd/streak/`todayCount`, ingen gnista/pling (matchar lågpress-tonen och deluppgifternas tysta avbockning). Lagras i `s.actions[]`.
+
 **Fångst** — röst (håll-in-och-prata, sv-SE) eller text. Efter fångst väljer man typ (uppgift/idé) och destination (inkorg/projekt).
 
 **Glöd (gamification)** — se nedan.

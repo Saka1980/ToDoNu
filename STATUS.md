@@ -2,7 +2,7 @@
 
 > Snabb nulägesbild. Läs den här först vid sessionsstart. Detaljerad kronologi finns i `LOG.md`, projektöversikt i `CLAUDE.md`, pending idéer i `IDEAS.md`.
 
-**Senast uppdaterad:** 2026-05-30
+**Senast uppdaterad:** 2026-05-30 (Handlingslista, v1.13)
 
 ## Var vi är just nu
 
@@ -27,6 +27,7 @@ Körbar, installerad och verifierad PWA på GitHub Pages. Vanilla JS (`index.htm
 - ✅ **Textvisning & rad-design omgjord** (VER 1.9) — gäller rakt igenom uppgifter, idéer, klara uppgifter och delsteg. (a) **Redigering flerradig**: `openSheet` använder `<textarea>` som auto-växer (`growField`), hela texten syns, Enter=Klar / Shift+Enter=ny rad. (b) **Lång text klamras till 3 rader + "visa mer"**: titlar/delsteg får `.clampable.clamp` (`-webkit-line-clamp:3`); "visa mer"-knappen visas bara när texten verkligen svämmar över (mäts i `applyClamps()` efter render), toggle utan omritning (`toggleMore()`). (c) **Ikon-kompakta åtgärder**: raden är nu `[☐][text full bredd via .icontent][→][🗑]` — "Gör" blev pil-ikon (38×38 träffyta, `title`-tooltip), papperskorg lika; texten stjäls inte längre av knapparna. Snabb-fångst-fältet på hemmet lämnat som `<input>` (autofokus för Gboard-mic). `sw.js`-cache bumpad → `todonu-v3`.
 - ✅ **Fångst-flöde omdesignat** (princip: lägg till på plats, kastas aldrig ut). `＋ uppgift`/`＋ idé` per sektion i projekt/inkorg (`addHere()`, panel underifrån) — sektion avgör typ, vy avgör destination, inga väljare. Orange + (FAB) **bara på huvudsidan**. Huvudsidans fångst **stannar kvar** efter Enter (statusrad `✓ Tillagt — fånga nästa`), utgång via `‹ Tillbaka`. VER 1.8.
 - ✅ **Dra-och-släpp-ordning på projekt** (VER 1.12) — varje projektkort har en greppikon `≡`; håll och dra i den för att flytta projektet upp/ned. Tryck på resten av kortet öppnar projektet som vanligt. Ingen datamodell-ändring (ordningen ligger i `s.projects`). Draget: `pointerdown` via delegering på `#projlist`, `pointermove`/`up` på **`document`** (inget pointer-capture-beroende — det var v1.10/1.11-buggen), sidan låses mot scroll (`body.draglock`), kortet följer fingret via `transform`, grannarna glider, arrayen sorteras om vid släpp. **Verifierad i riktig Chrome** (CDP-driven, dra-ned/dra-upp/tryck-öppnar — alla gröna). `onListPointerDown()`/`gripMove()`/`gripUp()`/`shiftNeighbors()` i `index.html`. `sw.js`-cache → `todonu-v6`.
+- ✅ **Handlingslista** (VER 1.13) — super-simpel, Keep-liknande, **helt fristående** checklista. Kort under Inkorg på framsidan (alltid synligt, "X kvar"/"Tom") → egen vy (`s.view==="action"`). "＋ Post i listan", bockbara punkter, avbockade blir genomstrukna och sjunker under hopfällbar "X markerade objekt"; × per rad + "Rensa avbockade"; klick-redigera (`openSheet`) + dra-ordna (`≡`, samma drag-motor som projekt). **Avbockning tyst** — ingen Glöd/streak/`todayCount`/gnista/pling. Data i `s.actions[]` (persisteras i load/save/export/import). Drag generaliserat: `setupProjectDrag`→`setupDrag` binder både `#projlist` och `#actionlist`. `addAction()/editAction()/removeAction()/clearDoneActions()/toggleAction()/toggleActionsCollapse()` i `index.html`. `sw.js`-cache → `todonu-v7`. **Verifierad i riktig Chrome** (CDP, 23 assertions: kort/vy/tillägg/tyst avbockning/regruppering/redigera/radera/rensa + dra-ordna + reload-persistens + projektdrag-regression — alla gröna).
 
 ## Nästa steg
 
@@ -36,6 +37,8 @@ Ingen funktion är i kö just nu. **Roadmap-punkt 2 (morgonnotis) är avgjord 20
 - **Inline-panelen kvar öppen** för flera tillägg i rad (liten UX-justering).
 
 Fråga ägaren vid nästa sessionsstart vad hen vill ta härnäst.
+
+**Arkitektur-not (2026-05-30):** Handlingslistan tog appen från 3 vyer (list/detail/capture) till 4 (+action) — tangerar tripwire-tröskel (b) i CLAUDE.md ("UI > ~3–4 vyer med delat interaktivt tillstånd"). Men action-vyn delar *inte* interaktivt tillstånd med övriga (egen array, egen collapse-flagga) och full `innerHTML`-omritning räcker fortfarande → medvetet beslut att stanna i vanilla. **Nästa vy-tillägg bör trigga ett omtag om migrering till Vite-SPA.**
 
 ## Känd teknisk skuld
 
