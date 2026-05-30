@@ -2,7 +2,7 @@
 // Strategi: network-first för HTML (nya deploys fastnar aldrig),
 // cache-first för assets (ikoner m.m. laddar direkt + funkar offline).
 // Höj versionen när cachade assets ändras → gamla cachen rensas i activate.
-const VERSION = 'todonu-v10';
+const VERSION = 'todonu-v11';
 
 // Lokala filer som förcachas vid install (inga cross-origin, t.ex. Google Fonts).
 const CORE = [

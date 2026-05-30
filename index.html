@@ -108,6 +108,11 @@ body.draglock{overflow:hidden;touch-action:none;overscroll-behavior:none}
 .addghost{flex:none;width:24px;height:24px;border-radius:7px;border:2px dashed var(--faint);opacity:.5}
 .inlinefield{flex:1;min-width:0;width:100%;background:none;border:none;outline:none;color:var(--ink);font-family:inherit;font-size:15px;padding:2px 0;line-height:1.5}
 .inlinefield::placeholder{color:var(--faint);font-style:italic}
+.step .inlinefield{font-size:13px}
+.tabs{display:flex;gap:8px;margin:2px 0 18px}
+.tab{flex:1;background:var(--bg2);border:1px solid var(--line);color:var(--soft);font-family:inherit;font-size:13px;padding:11px 8px;border-radius:12px;cursor:pointer;transition:.15s}
+.tab.on{background:rgba(240,168,48,.12);border-color:var(--amber);color:var(--ink)}
+.tab.idea.on{background:rgba(125,180,196,.12);border-color:var(--idea)}
 .burst{position:absolute;inset:0;pointer-events:none}
 .burst i{position:absolute;top:50%;left:50%;width:5px;height:5px;border-radius:50%;background:var(--amber);transform:translate(-50%,-50%);animation:spark var(--d) ease-out forwards}
 .burst i.big{background:var(--ember);box-shadow:0 0 6px var(--ember)}
@@ -147,7 +152,7 @@ body.draglock{overflow:hidden;touch-action:none;overscroll-behavior:none}
 <div id="app"></div>
 <script>
 const KEY="nu-projekt-v1";
-const VER="1.16";
+const VER="1.17";
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const isoD=d=>d.toISOString().slice(0,10);
 const today=()=>isoD(new Date());
@@ -159,7 +164,7 @@ let audio=null;
 let loadError=false;
 let capMsg="";
 let drag=null,suppressOpen=false;
-let actionsCollapsed=true,doneCollapsed=true;
+let actionsCollapsed=true,doneCollapsed=true,detailTab="task";
 let inline=null,inlineFlushing=false;
 
 function seedIfEmpty(){
@@ -188,46 +193,52 @@ function uncomplete(id){const it=s.items.find(x=>x.id===id);if(it){it.done=false
 function removeItem(id){if(isEdit("item",id))inline=null;s.items=s.items.filter(x=>x.id!==id);save();render()}
 function promote(id){const it=s.items.find(x=>x.id===id);if(it){it.type="task";it.fromIdea=true;save();render()}}
 function addItem(){const t=cap.draft.trim();if(!t)return;s.items.push({id:uid(),projectId:cap.dest==="inbox"?null:cap.dest,type:cap.kind,title:t,done:false,createdAt:Date.now()});cap.draft="";cap.kind="task";capMsg="✓ Tillagt — fånga nästa";save();render();setTimeout(()=>{const f=document.getElementById("field");if(f)try{f.focus()}catch(e){}},40)}
-function addStep(taskId){const it=s.items.find(x=>x.id===taskId);if(!it)return;openSheet("Ny deluppgift","",val=>{if(!it.steps)it.steps=[];it.steps.push({id:uid(),title:val,done:false});save();render()})}
-function removeStep(taskId,stepId){const it=s.items.find(x=>x.id===taskId);if(!it||!it.steps)return;it.steps=it.steps.filter(st=>st.id!==stepId);save();render()}
+function removeStep(taskId,stepId){const it=s.items.find(x=>x.id===taskId);if(!it||!it.steps)return;if(isEdit("step",stepId,taskId))inline=null;it.steps=it.steps.filter(st=>st.id!==stepId);save();render()}
 // Inline-redigering/-tillägg (Keep-stil), ett fält i taget, identifierat av `inline`:
-//   {op:'add', what:'action'|'task'|'idea'}  — håller fältet öppet för nästa post
-//   {op:'edit', what:'action'|'item', id}    — committar och stänger
-// inlineFlushing-vakten hindrar dubbel-commit när blur triggas av att render byter ut fältet.
+//   {op:'add', what:'action'|'task'|'idea'|'step', taskId?}  — håller fältet öppet för nästa post
+//   {op:'edit', what:'action'|'item'|'step', id, taskId?}    — committar och stänger
+// taskId binder fältet till rätt uppgift (delsteg). inlineFlushing-vakten hindrar dubbel-commit
+// när blur triggas av att render byter ut fältet.
 function inlineField(ph){return '<input id="inlinefield" class="inlinefield" placeholder="'+esc(ph||"")+'" autocomplete="off" onkeydown="inlineKey(event)" onblur="flushInline(false)">'}
-function isAdd(what){return inline&&inline.op==="add"&&inline.what===what}
-function isEdit(what,id){return inline&&inline.op==="edit"&&inline.what===what&&inline.id===id}
-function startAdd(what){inline={op:"add",what:what};render();focusInline()}
-function startEdit(what,id){inline={op:"edit",what:what,id:id};render();focusInline()}
-function inlineTitle(what,id){const o=what==="action"?s.actions.find(a=>a.id===id):s.items.find(i=>i.id===id);return o?o.title:""}
-function focusInline(){setTimeout(()=>{const f=document.getElementById("inlinefield");if(!f)return;if(inline&&inline.op==="edit")f.value=inlineTitle(inline.what,inline.id)||"";try{f.focus();const n=f.value.length;f.setSelectionRange(n,n)}catch(e){}},50)}
+function isAdd(what,taskId){return inline&&inline.op==="add"&&inline.what===what&&(taskId===undefined?!inline.taskId:inline.taskId===taskId)}
+function isEdit(what,id,taskId){return inline&&inline.op==="edit"&&inline.what===what&&inline.id===id&&(taskId===undefined||inline.taskId===taskId)}
+function startAdd(what,taskId){inline={op:"add",what:what,taskId:taskId};render();focusInline()}
+function startEdit(what,id,taskId){inline={op:"edit",what:what,id:id,taskId:taskId};render();focusInline()}
+function inlineTitle(inl){
+  if(inl.what==="action"){const a=s.actions.find(x=>x.id===inl.id);return a?a.title:""}
+  if(inl.what==="step"){const it=s.items.find(x=>x.id===inl.taskId);const st=it&&it.steps&&it.steps.find(x=>x.id===inl.id);return st?st.title:""}
+  const it=s.items.find(x=>x.id===inl.id);return it?it.title:"";
+}
+function focusInline(){setTimeout(()=>{const f=document.getElementById("inlinefield");if(!f)return;if(inline&&inline.op==="edit")f.value=inlineTitle(inline)||"";try{f.focus();const n=f.value.length;f.setSelectionRange(n,n)}catch(e){}},50)}
 function inlineKey(e){if(e.key==="Enter"){e.preventDefault();const f=document.getElementById("inlinefield");const has=!!(f&&f.value.trim());flushInline(inline&&inline.op==="add"?has:false)}else if(e.key==="Escape"){cancelInline()}}
 function cancelInline(){inlineFlushing=true;inline=null;render();setTimeout(()=>{inlineFlushing=false},60)}
 function flushInline(keepOpen){
   if(inlineFlushing)return;inlineFlushing=true;
   const f=document.getElementById("inlinefield");const v=f?f.value.trim():"";const inl=inline;
   if(inl){
-    if(inl.op==="add"){if(v)commitAdd(inl.what,v);inline=keepOpen?{op:"add",what:inl.what}:null}
-    else{if(v)commitEdit(inl.what,inl.id,v);inline=null}
+    if(inl.op==="add"){if(v)commitAdd(inl,v);inline=keepOpen?{op:"add",what:inl.what,taskId:inl.taskId}:null}
+    else{if(v)commitEdit(inl,v);inline=null}
   }
   render();if(inline)focusInline();
   setTimeout(()=>{inlineFlushing=false},60);
 }
-function commitAdd(what,v){
-  if(what==="action")s.actions.push({id:uid(),title:v,done:false,createdAt:Date.now()});
-  else{const pid=s.cur==="inbox"?null:s.cur;s.items.push({id:uid(),projectId:pid,type:what,title:v,done:false,createdAt:Date.now()})}
+function commitAdd(inl,v){
+  if(inl.what==="action")s.actions.push({id:uid(),title:v,done:false,createdAt:Date.now()});
+  else if(inl.what==="step"){const it=s.items.find(x=>x.id===inl.taskId);if(it){if(!it.steps)it.steps=[];it.steps.push({id:uid(),title:v,done:false})}}
+  else{const pid=s.cur==="inbox"?null:s.cur;s.items.push({id:uid(),projectId:pid,type:inl.what,title:v,done:false,createdAt:Date.now()})}
   save();
 }
-function commitEdit(what,id,v){
-  if(what==="action"){const a=s.actions.find(x=>x.id===id);if(a)a.title=v}
-  else{const it=s.items.find(x=>x.id===id);if(it)it.title=v}
+function commitEdit(inl,v){
+  if(inl.what==="action"){const a=s.actions.find(x=>x.id===inl.id);if(a)a.title=v}
+  else if(inl.what==="step"){const it=s.items.find(x=>x.id===inl.taskId);const st=it&&it.steps&&it.steps.find(x=>x.id===inl.id);if(st)st.title=v}
+  else{const it=s.items.find(x=>x.id===inl.id);if(it)it.title=v}
   save();
 }
-function editStep(taskId,stepId){const it=s.items.find(x=>x.id===taskId);if(!it||!it.steps)return;const st=it.steps.find(x=>x.id===stepId);if(!st)return;openSheet("Ändra steget",st.title,val=>{st.title=val;save();render()})}
 function removeAction(id){if(isEdit("action",id))inline=null;s.actions=s.actions.filter(x=>x.id!==id);save();render()}
 function clearDoneActions(){s.actions=s.actions.filter(a=>!a.done);save();render()}
 function toggleActionsCollapse(){actionsCollapsed=!actionsCollapsed;render()}
 function toggleDoneCollapse(){doneCollapsed=!doneCollapsed;render()}
+function setTab(t){detailTab=t;inline=null;render()}
 function clearDoneTasks(){const isInbox=s.cur==="inbox";s.items=s.items.filter(i=>!(i.type==="task"&&i.done&&(isInbox?!i.projectId:i.projectId===s.cur)));save();render()}
 function toggleAction(id){const a=s.actions.find(x=>x.id===id);if(!a)return;a.done=!a.done;if(a.done)a.completedAt=Date.now();else delete a.completedAt;save();render()}
 function toggleStep(taskId,stepId){const it=s.items.find(x=>x.id===taskId);if(!it||!it.steps)return;const st=it.steps.find(x=>x.id===stepId);if(!st)return;st.done=!st.done;const row=document.getElementById("step_"+taskId+"_"+stepId);if(row){row.classList.toggle("done",st.done);const c=row.querySelector(".scheck");if(c){c.classList.toggle("on",st.done);c.textContent=st.done?"✓":""}}const dn=it.steps.filter(x=>x.done).length;const pr=document.getElementById("prog_"+taskId);if(pr){pr.textContent=dn+"/"+it.steps.length;pr.classList.toggle("all",dn===it.steps.length&&dn>0)}save()}
@@ -246,7 +257,7 @@ function pickImport(){const inp=document.createElement("input");inp.type="file";
 function importData(file){const r=new FileReader();r.onload=()=>{let d;try{const parsed=JSON.parse(r.result);d=parsed&&parsed.data?parsed.data:parsed}catch(e){alert("Kunde inte läsa filen – är det en ToDoNu-backup?");return}if(!d||!Array.isArray(d.projects)){alert("Filen ser inte ut som en ToDoNu-backup.");return}if(!confirm("Importera ersätter all data på den här enheten. Fortsätt?"))return;s.projects=d.projects;s.items=Array.isArray(d.items)?d.items:[];s.actions=Array.isArray(d.actions)?d.actions:[];s.stats=Object.assign({streak:0,lastActive:"",todayDate:"",todayCount:0,ideasRealized:0},d.stats||{});loadError=false;s.view="list";s.cur=null;save();render()};r.onerror=()=>alert("Kunde inte läsa filen.");r.readAsText(file)}
 function exportRaw(){const raw=localStorage.getItem(KEY+"-korrupt")||"";const blob=new Blob([raw],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="todonu-rakopia-"+today()+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)}
 function go(v){capMsg="";inline=null;s.view=v;if(v==="capture"){cap.draft="";render();setTimeout(()=>{const f=document.getElementById("field");if(f)try{f.focus()}catch(e){}},60);return}render()}
-function openProj(id){if(suppressOpen)return;inline=null;s.cur=id;s.view="detail";render()}
+function openProj(id){if(suppressOpen)return;inline=null;detailTab="task";s.cur=id;s.view="detail";render()}
 
 function toggleExtra(){const el=document.getElementById("extra");if(el)el.style.display=cap.draft.trim()?"":"none"}
 function greeting(){const h=new Date().getHours();return h<10?"God morgon":h<18?"Hej":"God kväll"}
@@ -293,14 +304,17 @@ function render(){
     const its=s.items.filter(i=>isInbox?!i.projectId:i.projectId===s.cur);
     const tasks=its.filter(i=>i.type==="task");const ideas=its.filter(i=>i.type==="idea");
     h+='<div class="body"><div class="dhead"><h1>'+(isInbox?"Inkorg":esc(proj?proj.name:""))+'</h1>'+(!isInbox&&proj?'<button class="delproj" onclick="removeProject(\''+proj.id+'\')">🗑</button>':'')+'</div>';
-    h+='<div class="stream"><div class="shead">▸ Uppgifter</div>';
-    if(tasks.filter(t=>!t.done).length===0)h+='<p class="emptyline">Inga öppna uppgifter.</p>';
+    const openTaskN=tasks.filter(t=>!t.done).length;
+    h+='<div class="tabs"><button class="tab'+(detailTab==="task"?" on":"")+'" onclick="setTab(\'task\')">Uppgifter ('+openTaskN+')</button><button class="tab idea'+(detailTab==="idea"?" on":"")+'" onclick="setTab(\'idea\')">💡 Idéer ('+ideas.length+')</button></div>';
+    if(detailTab==="task"){
+    h+='<div class="stream">';
+    if(openTaskN===0)h+='<p class="emptyline">Inga öppna uppgifter.</p>';
     tasks.filter(t=>!t.done).forEach(t=>{
       const hasSteps=t.steps&&t.steps.length>0;const dn=hasSteps?t.steps.filter(x=>x.done).length:0;
       h+='<div class="item"><button class="check" id="chk_'+t.id+'" onclick="completeTask(\''+t.id+'\')"></button><div class="icontent">'+(isEdit("item",t.id)?inlineField():'<span class="ititle clampable clamp" onclick="startEdit(\'item\',\''+t.id+'\')">'+esc(t.title)+(t.fromIdea?'<span class="fromidea">💡</span>':'')+'</span><button class="moretoggle" hidden onclick="toggleMore(this)">visa mer</button>')+'</div>'+(hasSteps?'<span class="prog" id="prog_'+t.id+'">'+dn+'/'+t.steps.length+'</span>':'')+(isInbox?'<button class="move" title="Flytta till projekt" onclick="moveItem(\''+t.id+'\')">📁</button>':'')+'<button class="del" onclick="removeItem(\''+t.id+'\')">🗑</button></div>';
       h+='<div class="steps" id="steps_'+t.id+'">';
-      if(hasSteps)t.steps.forEach(st=>{h+='<div class="step'+(st.done?' done':'')+'" id="step_'+t.id+'_'+st.id+'"><button class="scheck'+(st.done?' on':'')+'" onclick="toggleStep(\''+t.id+'\',\''+st.id+'\')">'+(st.done?'✓':'')+'</button><div class="icontent"><span class="stitle clampable clamp" onclick="editStep(\''+t.id+'\',\''+st.id+'\')">'+esc(st.title)+'</span><button class="moretoggle" hidden onclick="toggleMore(this)">visa mer</button></div><button class="sdel" onclick="removeStep(\''+t.id+'\',\''+st.id+'\')">×</button></div>'});
-      h+='<button class="addstep" onclick="addStep(\''+t.id+'\')">＋ steg</button></div>';
+      if(hasSteps)t.steps.forEach(st=>{h+='<div class="step'+(st.done?' done':'')+'" id="step_'+t.id+'_'+st.id+'"><button class="scheck'+(st.done?' on':'')+'" onclick="toggleStep(\''+t.id+'\',\''+st.id+'\')">'+(st.done?'✓':'')+'</button><div class="icontent">'+(isEdit("step",st.id,t.id)?inlineField("Skriv ett steg…"):'<span class="stitle clampable clamp" onclick="startEdit(\'step\',\''+st.id+'\',\''+t.id+'\')">'+esc(st.title)+'</span><button class="moretoggle" hidden onclick="toggleMore(this)">visa mer</button>')+'</div><button class="sdel" onclick="removeStep(\''+t.id+'\',\''+st.id+'\')">×</button></div>'});
+      h+=(isAdd("step",t.id)?'<div class="step adding">'+inlineField("Skriv ett steg…")+'</div>':'<button class="addstep" onclick="startAdd(\'step\',\''+t.id+'\')">＋ steg</button>')+'</div>';
     });
     if(isAdd("task"))h+='<div class="item adding"><span class="addghost"></span>'+inlineField("Skriv en uppgift…")+'</div>';
     else h+='<button class="addhere" onclick="startAdd(\'task\')">＋ uppgift</button>';
@@ -314,12 +328,17 @@ function render(){
         h+='</div>';
       }
     }
-    h+='</div><div class="stream"><div class="shead idea">💡 Idéer</div>';
+    h+='</div>';
+    }
+    if(detailTab==="idea"){
+    h+='<div class="stream">';
     if(ideas.length===0)h+='<p class="emptyline">Inga idéer än.</p>';
     ideas.forEach(t=>{h+='<div class="item idea"><span class="ideadot"></span><div class="icontent">'+(isEdit("item",t.id)?inlineField():'<span class="ititle clampable clamp" onclick="startEdit(\'item\',\''+t.id+'\')">'+esc(t.title)+'</span><button class="moretoggle" hidden onclick="toggleMore(this)">visa mer</button>')+'</div>'+(isInbox?'<button class="move" title="Flytta till projekt" onclick="moveItem(\''+t.id+'\')">📁</button>':'')+'<button class="promote" title="Gör till uppgift" onclick="promote(\''+t.id+'\')">→</button><button class="del" onclick="removeItem(\''+t.id+'\')">🗑</button></div>'});
     if(isAdd("idea"))h+='<div class="item idea adding"><span class="ideadot"></span>'+inlineField("Skriv en idé…")+'</div>';
     else h+='<button class="addhere" onclick="startAdd(\'idea\')">＋ idé</button>';
-    h+='</div></div>';
+    h+='</div>';
+    }
+    h+='</div>';
   }
 
   if(s.view==="action"){
