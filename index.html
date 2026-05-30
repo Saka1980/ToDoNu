@@ -47,6 +47,8 @@ body{background:var(--bg);color:var(--ink);font-family:'Space Mono',monospace;mi
 .grip:hover{color:var(--ink);background:var(--bg2)}.grip:active{cursor:grabbing}
 .proj{transition:transform .15s ease,box-shadow .12s,border-color .12s}
 .proj.dragging{border-color:var(--ember);box-shadow:0 16px 32px -10px rgba(0,0,0,.7);position:relative;z-index:5;cursor:grabbing}
+.act{transition:transform .15s ease,box-shadow .12s,border-color .12s}
+.act.dragging{border:1px solid var(--ember);border-radius:12px;background:var(--card);box-shadow:0 16px 32px -10px rgba(0,0,0,.7);position:relative;z-index:5;cursor:grabbing}
 body.draglock{overflow:hidden;touch-action:none;overscroll-behavior:none}
 .newproj{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:none;border:1px dashed var(--line);color:var(--soft);border-radius:16px;padding:14px;cursor:pointer;font-family:inherit;font-size:14px;margin-top:4px;transition:.15s}
 .newproj:hover{border-color:var(--soft);color:var(--ink)}
@@ -299,7 +301,7 @@ function render(){
   if(s.view==="list")h+='<button class="fab" onclick="go(\'capture\')">＋</button>';
   app.innerHTML=h;
   applyClamps();
-  setupProjectDrag();
+  setupDrag();
 }
 function applyClamps(){
   document.querySelectorAll(".icontent").forEach(blk=>{
@@ -313,25 +315,26 @@ function toggleMore(btn){
   t.classList.toggle("clamp");
   btn.textContent=t.classList.contains("clamp")?"visa mer":"visa mindre";
 }
-// Dra projekt: lyssnar på document (mus/touch levererar alltid move-event dit
+// Dra för att ordna om: lyssnar på document (mus/touch levererar alltid move-event dit
 // — inget beroende av pointer-capture som tappades på touch/desktop tidigare).
 // Kortet flyttas via transform, grannarna glider, sidan låses mot scroll under
-// draget, och s.projects sorteras om en gång vid släpp.
+// draget, och arrayen sorteras om en gång vid släpp. Används för både projektlistan
+// (#projlist/.proj → s.projects) och handlingslistan (#actionlist/.act → s.actions).
 let dragMoveH=null,dragUpH=null;
-function setupProjectDrag(){
-  const list=document.getElementById("projlist");if(!list)return;
-  list.addEventListener("pointerdown",onListPointerDown);
+function setupDrag(){
+  ["projlist","actionlist"].forEach(id=>{const list=document.getElementById(id);if(list)list.addEventListener("pointerdown",onListPointerDown)});
 }
 function onListPointerDown(e){
   if(drag||e.button>0)return;
   const g=e.target.closest(".grip");if(!g)return;
-  const card=g.closest(".proj");if(!card)return;
+  const card=g.closest(".proj,.act");if(!card)return;
   const list=card.parentNode;
   e.preventDefault();
-  const cards=[...list.querySelectorAll(".proj")];
+  const sel=card.classList.contains("proj")?".proj":".act";
+  const cards=[...list.querySelectorAll(sel)];
   const index=cards.indexOf(card);
-  const slotH=card.offsetHeight+10; // .cardbtn margin-bottom:10
-  drag={el:card,id:e.pointerId,startY:e.clientY,cards,index,target:index,slotH,moved:false};
+  const slotH=card.offsetHeight+(list.id==="projlist"?10:0); // .cardbtn har margin-bottom:10, .item inte
+  drag={el:card,id:e.pointerId,startY:e.clientY,cards,index,target:index,slotH,moved:false,listId:list.id};
   card.classList.add("dragging");card.style.transition="none";
   document.body.classList.add("draglock");
   dragMoveH=gripMove;dragUpH=gripUp;
@@ -365,13 +368,20 @@ function gripUp(e){
   document.removeEventListener("pointerup",dragUpH);
   document.removeEventListener("pointercancel",dragUpH);
   document.body.classList.remove("draglock");
-  const {el,cards,index,target,moved}=drag;
+  const {el,cards,index,target,moved,listId}=drag;
   cards.forEach(c=>{c.style.transform="";c.style.transition=""});
   el.classList.remove("dragging");
   drag=null;
   if(moved&&target!==index){
-    const[p]=s.projects.splice(index,1);
-    s.projects.splice(target,0,p);
+    if(listId==="actionlist"){
+      // #actionlist renderar bara öppna poster — ordna om bland dem och lägg avbockade sist.
+      const open=cards.map(c=>s.actions.find(a=>a.id===c.dataset.aid)).filter(Boolean);
+      const[m]=open.splice(index,1);open.splice(target,0,m);
+      s.actions=open.concat(s.actions.filter(a=>a.done));
+    }else{
+      const[p]=s.projects.splice(index,1);
+      s.projects.splice(target,0,p);
+    }
     suppressOpen=true;setTimeout(()=>{suppressOpen=false},120);
     save();render();
   }
