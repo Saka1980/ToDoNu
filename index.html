@@ -60,27 +60,32 @@ body{background:var(--bg);color:var(--ink);font-family:'Space Mono',monospace;mi
 .shead{display:flex;align-items:center;gap:7px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin-bottom:12px}
 .shead.idea{color:var(--idea)}
 .emptyline{color:var(--faint);font-size:13px;margin-bottom:6px;padding-left:4px}
-.item{display:flex;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid var(--line);animation:fade .2s}
-.check{position:relative;flex:none;width:24px;height:24px;border-radius:7px;border:2px solid var(--amber);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#13100e;transition:.15s;font-size:13px;font-weight:700}
+.item{display:flex;align-items:flex-start;gap:10px;padding:12px 4px;border-bottom:1px solid var(--line);animation:fade .2s}
+.check{position:relative;flex:none;width:24px;height:24px;margin-top:1px;border-radius:7px;border:2px solid var(--amber);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#13100e;transition:.15s;font-size:13px;font-weight:700}
 .check:hover{background:rgba(240,168,48,.15)}
 .check.on{background:var(--green);border-color:var(--green)}
-.ititle{flex:1;font-size:15px;word-break:break-word;cursor:pointer}
+.icontent{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:1px}
+.ititle{font-size:15px;cursor:pointer;width:100%}
+.clampable{line-height:1.5;word-break:break-word;overflow-wrap:anywhere}
+.clampable.clamp{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.moretoggle{background:none;border:none;color:var(--faint);font-family:inherit;font-size:12px;cursor:pointer;padding:3px 2px;letter-spacing:.02em}
+.moretoggle:hover{color:var(--soft)}
 .fromidea{color:var(--idea);font-size:12px;margin-left:5px}
 .item.done .ititle{text-decoration:line-through;color:var(--faint)}
-.ideadot{flex:none;width:9px;height:9px;border-radius:50%;background:var(--idea);margin:0 7px;box-shadow:0 0 8px rgba(125,180,196,.5)}
+.ideadot{flex:none;width:9px;height:9px;border-radius:50%;background:var(--idea);margin:8px 0 0;box-shadow:0 0 8px rgba(125,180,196,.5)}
 .item.idea .ititle{color:#d8d0c2}
-.promote{display:flex;align-items:center;gap:4px;background:rgba(125,180,196,.12);border:1px solid transparent;color:var(--idea);font-family:inherit;font-size:12px;padding:6px 11px;border-radius:12px;cursor:pointer;flex:none}
+.promote{flex:none;display:flex;align-items:center;justify-content:center;width:38px;height:38px;background:rgba(125,180,196,.12);border:1px solid transparent;color:var(--idea);font-size:19px;border-radius:11px;cursor:pointer;line-height:1}
 .promote:hover{border-color:var(--idea)}
-.del{background:none;border:none;color:var(--faint);cursor:pointer;padding:4px;flex:none;font-size:13px}
+.del{flex:none;display:flex;align-items:center;justify-content:center;width:38px;height:38px;background:none;border:none;color:var(--faint);cursor:pointer;font-size:15px;border-radius:11px}
 .del:hover{color:var(--ember)}
-.prog{flex:none;font-size:11px;color:var(--faint);margin-left:6px}.prog.all{color:var(--green)}
+.prog{flex:none;font-size:11px;color:var(--faint);margin:9px 0 0 4px}.prog.all{color:var(--green)}
 .steps{margin:0 0 12px 36px;display:flex;flex-direction:column}
-.step{display:flex;align-items:center;gap:10px;padding:7px 2px;animation:fade .2s}
-.scheck{flex:none;width:18px;height:18px;border-radius:6px;border:2px solid var(--faint);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#13100e;font-size:11px;font-weight:700;transition:.15s}
+.step{display:flex;align-items:flex-start;gap:10px;padding:7px 2px;animation:fade .2s}
+.scheck{flex:none;width:18px;height:18px;margin-top:1px;border-radius:6px;border:2px solid var(--faint);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#13100e;font-size:11px;font-weight:700;transition:.15s}
 .scheck:hover{border-color:var(--green)}.scheck.on{background:var(--green);border-color:var(--green)}
-.stitle{flex:1;font-size:13px;color:var(--soft);word-break:break-word;cursor:pointer}
+.stitle{font-size:13px;color:var(--soft);cursor:pointer;width:100%}
 .step.done .stitle{text-decoration:line-through;color:var(--faint)}
-.sdel{background:none;border:none;color:var(--faint);cursor:pointer;font-size:13px;flex:none;padding:2px 5px;opacity:.55}
+.sdel{background:none;border:none;color:var(--faint);cursor:pointer;font-size:13px;flex:none;padding:2px 5px;margin-top:3px;opacity:.55}
 .sdel:hover{color:var(--ember);opacity:1}
 .addstep{align-self:flex-start;background:none;border:none;color:var(--faint);font-family:inherit;font-size:12px;cursor:pointer;padding:6px 2px}
 .addstep:hover{color:var(--idea)}
@@ -111,7 +116,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Space Mono',monospace;mi
 @keyframes slideup{from{transform:translateY(100%)}to{transform:none}}
 .sheet-t{font-family:'Fraunces',serif;font-size:18px;margin-bottom:16px}
 .sheet-row{display:flex;align-items:center;gap:12px}
-.sheet-f{flex:1;min-width:0;background:none;border:none;border-bottom:2px solid var(--line);outline:none;font-family:'Fraunces',serif;font-size:20px;color:var(--ink);padding:8px 2px}
+.sheet-f{flex:1;min-width:0;display:block;background:none;border:none;border-bottom:2px solid var(--line);outline:none;font-family:'Fraunces',serif;font-size:20px;line-height:1.4;color:var(--ink);padding:8px 2px;resize:none;max-height:40vh;overflow-y:auto}
 .sheet-f:focus{border-color:var(--ember)}.sheet-f::placeholder{color:var(--faint);font-style:italic}
 .sheet-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
 .sheet-cancel{background:none;border:1px solid var(--line);color:var(--soft);font-family:inherit;font-size:14px;padding:11px 18px;border-radius:12px;cursor:pointer}
@@ -122,7 +127,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Space Mono',monospace;mi
 <div id="app"></div>
 <script>
 const KEY="nu-projekt-v1";
-const VER="1.8";
+const VER="1.9";
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const isoD=d=>d.toISOString().slice(0,10);
 const today=()=>isoD(new Date());
@@ -168,7 +173,8 @@ function toggleStep(taskId,stepId){const it=s.items.find(x=>x.id===taskId);if(!i
 function addProject(){openSheet("Nytt projekt","",val=>{const id=uid();s.projects.push({id,name:val,createdAt:Date.now()});s.cur=id;s.view="detail";save();render()})}
 function addHere(kind){const pid=s.cur==="inbox"?null:s.cur;openSheet(kind==="idea"?"Ny idé":"Ny uppgift","",val=>{s.items.push({id:uid(),projectId:pid,type:kind,title:val,done:false,createdAt:Date.now()});save();render()})}
 let sheet=null;
-function openSheet(title,initial,onConfirm){closeSheet();sheet={onConfirm};const bg=document.createElement("div");bg.className="sheet-bg";bg.id="sheetbg";bg.onclick=closeSheet;const el=document.createElement("div");el.className="sheet";el.id="sheet";el.innerHTML='<div class="sheet-t">'+esc(title)+'</div><div class="sheet-row"><input id="sheetfield" class="sheet-f" placeholder="Skriv eller diktera…"></div><div class="sheet-actions"><button class="sheet-cancel">Avbryt</button><button class="sheet-ok">Klar</button></div>';document.body.appendChild(bg);document.body.appendChild(el);const inp=el.querySelector("#sheetfield");inp.value=initial||"";inp.onkeydown=e=>{if(e.key==="Enter")confirmSheet()};setTimeout(()=>{try{inp.focus()}catch(e){}},60);el.querySelector(".sheet-cancel").onclick=closeSheet;el.querySelector(".sheet-ok").onclick=confirmSheet}
+function growField(el){if(!el)return;el.style.height="auto";el.style.height=el.scrollHeight+"px"}
+function openSheet(title,initial,onConfirm){closeSheet();sheet={onConfirm};const bg=document.createElement("div");bg.className="sheet-bg";bg.id="sheetbg";bg.onclick=closeSheet;const el=document.createElement("div");el.className="sheet";el.id="sheet";el.innerHTML='<div class="sheet-t">'+esc(title)+'</div><div class="sheet-row"><textarea id="sheetfield" class="sheet-f" rows="1" placeholder="Skriv eller diktera…"></textarea></div><div class="sheet-actions"><button class="sheet-cancel">Avbryt</button><button class="sheet-ok">Klar</button></div>';document.body.appendChild(bg);document.body.appendChild(el);const inp=el.querySelector("#sheetfield");inp.value=initial||"";inp.oninput=()=>growField(inp);inp.onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();confirmSheet()}};setTimeout(()=>{try{inp.focus()}catch(e){};growField(inp)},60);el.querySelector(".sheet-cancel").onclick=closeSheet;el.querySelector(".sheet-ok").onclick=confirmSheet}
 function confirmSheet(){const inp=document.getElementById("sheetfield");if(!inp)return;const v=inp.value.trim();const cb=sheet&&sheet.onConfirm;closeSheet();if(v&&cb)cb(v)}
 function closeSheet(){const bg=document.getElementById("sheetbg");if(bg)bg.remove();const el=document.getElementById("sheet");if(el)el.remove();sheet=null}
 function removeProject(id){s.projects=s.projects.filter(p=>p.id!==id);s.items.forEach(x=>{if(x.projectId===id)x.projectId=null});s.view="list";save();render()}
@@ -224,16 +230,16 @@ function render(){
     if(tasks.filter(t=>!t.done).length===0)h+='<p class="emptyline">Inga öppna uppgifter.</p>';
     tasks.filter(t=>!t.done).forEach(t=>{
       const hasSteps=t.steps&&t.steps.length>0;const dn=hasSteps?t.steps.filter(x=>x.done).length:0;
-      h+='<div class="item"><button class="check" id="chk_'+t.id+'" onclick="completeTask(\''+t.id+'\')"></button><span class="ititle" onclick="editItem(\''+t.id+'\')">'+esc(t.title)+(t.fromIdea?'<span class="fromidea">💡</span>':'')+'</span>'+(hasSteps?'<span class="prog" id="prog_'+t.id+'">'+dn+'/'+t.steps.length+'</span>':'')+'<button class="del" onclick="removeItem(\''+t.id+'\')">🗑</button></div>';
+      h+='<div class="item"><button class="check" id="chk_'+t.id+'" onclick="completeTask(\''+t.id+'\')"></button><div class="icontent"><span class="ititle clampable clamp" onclick="editItem(\''+t.id+'\')">'+esc(t.title)+(t.fromIdea?'<span class="fromidea">💡</span>':'')+'</span><button class="moretoggle" hidden onclick="toggleMore(this)">visa mer</button></div>'+(hasSteps?'<span class="prog" id="prog_'+t.id+'">'+dn+'/'+t.steps.length+'</span>':'')+'<button class="del" onclick="removeItem(\''+t.id+'\')">🗑</button></div>';
       h+='<div class="steps" id="steps_'+t.id+'">';
-      if(hasSteps)t.steps.forEach(st=>{h+='<div class="step'+(st.done?' done':'')+'" id="step_'+t.id+'_'+st.id+'"><button class="scheck'+(st.done?' on':'')+'" onclick="toggleStep(\''+t.id+'\',\''+st.id+'\')">'+(st.done?'✓':'')+'</button><span class="stitle" onclick="editStep(\''+t.id+'\',\''+st.id+'\')">'+esc(st.title)+'</span><button class="sdel" onclick="removeStep(\''+t.id+'\',\''+st.id+'\')">×</button></div>'});
+      if(hasSteps)t.steps.forEach(st=>{h+='<div class="step'+(st.done?' done':'')+'" id="step_'+t.id+'_'+st.id+'"><button class="scheck'+(st.done?' on':'')+'" onclick="toggleStep(\''+t.id+'\',\''+st.id+'\')">'+(st.done?'✓':'')+'</button><div class="icontent"><span class="stitle clampable clamp" onclick="editStep(\''+t.id+'\',\''+st.id+'\')">'+esc(st.title)+'</span><button class="moretoggle" hidden onclick="toggleMore(this)">visa mer</button></div><button class="sdel" onclick="removeStep(\''+t.id+'\',\''+st.id+'\')">×</button></div>'});
       h+='<button class="addstep" onclick="addStep(\''+t.id+'\')">＋ steg</button></div>';
     });
-    tasks.filter(t=>t.done).forEach(t=>{h+='<div class="item done"><button class="check on" onclick="uncomplete(\''+t.id+'\')">✓</button><span class="ititle" onclick="editItem(\''+t.id+'\')">'+esc(t.title)+'</span><button class="del" onclick="removeItem(\''+t.id+'\')">🗑</button></div>'});
+    tasks.filter(t=>t.done).forEach(t=>{h+='<div class="item done"><button class="check on" onclick="uncomplete(\''+t.id+'\')">✓</button><div class="icontent"><span class="ititle clampable clamp" onclick="editItem(\''+t.id+'\')">'+esc(t.title)+'</span><button class="moretoggle" hidden onclick="toggleMore(this)">visa mer</button></div><button class="del" onclick="removeItem(\''+t.id+'\')">🗑</button></div>'});
     h+='<button class="addhere" onclick="addHere(\'task\')">＋ uppgift</button>';
     h+='</div><div class="stream"><div class="shead idea">💡 Idéer</div>';
     if(ideas.length===0)h+='<p class="emptyline">Inga idéer än.</p>';
-    ideas.forEach(t=>{h+='<div class="item idea"><span class="ideadot"></span><span class="ititle" onclick="editItem(\''+t.id+'\')">'+esc(t.title)+'</span><button class="promote" onclick="promote(\''+t.id+'\')">→ Gör</button><button class="del" onclick="removeItem(\''+t.id+'\')">🗑</button></div>'});
+    ideas.forEach(t=>{h+='<div class="item idea"><span class="ideadot"></span><div class="icontent"><span class="ititle clampable clamp" onclick="editItem(\''+t.id+'\')">'+esc(t.title)+'</span><button class="moretoggle" hidden onclick="toggleMore(this)">visa mer</button></div><button class="promote" title="Gör till uppgift" onclick="promote(\''+t.id+'\')">→</button><button class="del" onclick="removeItem(\''+t.id+'\')">🗑</button></div>'});
     h+='<button class="addhere" onclick="addHere(\'idea\')">＋ idé</button>';
     h+='</div></div>';
   }
@@ -251,6 +257,19 @@ function render(){
 
   if(s.view==="list")h+='<button class="fab" onclick="go(\'capture\')">＋</button>';
   app.innerHTML=h;
+  applyClamps();
+}
+function applyClamps(){
+  document.querySelectorAll(".icontent").forEach(blk=>{
+    const t=blk.querySelector(".clampable"),b=blk.querySelector(".moretoggle");
+    if(!t||!b)return;
+    b.hidden=!(t.classList.contains("clamp")&&t.scrollHeight>t.clientHeight+1);
+  });
+}
+function toggleMore(btn){
+  const t=btn.parentNode.querySelector(".clampable");if(!t)return;
+  t.classList.toggle("clamp");
+  btn.textContent=t.classList.contains("clamp")?"visa mer":"visa mindre";
 }
 async function persistStorage(){try{if(navigator.storage&&navigator.storage.persist)await navigator.storage.persist()}catch(e){}}
 function iosHint(){try{
