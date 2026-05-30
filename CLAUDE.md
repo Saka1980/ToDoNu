@@ -50,6 +50,7 @@ item    = { id, projectId,        // null = inkorg
             fromIdea?,             // true om idé → uppgift (ger större belöning)
             createdAt, completedAt? }
 step    = { id, title, done }      // deluppgift i item.steps[]
+action  = { id, title, done, createdAt, completedAt? }  // post i Handlingslistan (s.actions[], fristående)
 stats   = { streak, lastActive, todayDate, todayCount, ideasRealized }
 ```
 
