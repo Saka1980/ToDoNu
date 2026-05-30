@@ -12,8 +12,12 @@ Kronologisk logg över vad vi byggt och *varför*. Nyaste överst när nya rader
 - **Ingen datamodell-ändring:** ordningen ligger redan implicit i `s.projects`-arrayen. Att flytta i arrayen + `save()` räcker; `load()` bevarar ordningen.
 - **Byggt (allt i `index.html`):**
   - **Markup:** projektkorten wrappas i `<div id="projlist">`; varje kort blev `<div class="cardbtn proj" data-pid=…>` (knapp-i-knapp är ogiltig HTML när greppet är en egen knapp). Greppikon `≡` med `onclick="event.stopPropagation()"` → tryck på greppet öppnar aldrig projektet. Inkorgskortet och "Nytt projekt" ligger utanför containern (ej flyttbara).
-  - **Touch-drag (Pointer Events, vanilla):** `setupProjectDrag()` binder `pointerdown` på varje grepp efter varje render. `setPointerCapture` på greppet, kortet får `.dragging` (lyft-look). `pointermove` → live-omsortering i DOM efter fingrets Y (`dragAfter()`, klassiskt midpoint-mönster). `pointerup/cancel` → läs av DOM-ordningen, sortera `s.projects` därefter, `save()`+`render()`. `suppressOpen`-flagga (~80 ms) hindrar att släppet av misstag öppnar ett projekt. 4px-tröskel skiljer dra från statiskt tryck. Fungerar även med mus (snabbtest på dator).
+  - **Touch-drag (Pointer Events, vanilla):** `setupProjectDrag()` binder `pointerdown` på varje grepp efter varje render. `setPointerCapture` på greppet, kortet får `.dragging` (lyft-look). 4px-tröskel skiljer dra från statiskt tryck. `suppressOpen`-flagga (~80 ms) hindrar att släppet av misstag öppnar ett projekt. Fungerar även med mus (snabbtest på dator).
 - **`VER` bumpad 1.9 → 1.10**, `sw.js`-cache `todonu-v3` → `todonu-v4`.
+
+**Buggfix samma session (v1.11):** första versionen (v1.10) markerade kortet men gick inte att flytta — varken på Pixel eller dator. Orsak: draget flyttade kortet i DOM under rörelsen via `insertBefore`, och Chrome (både Android och desktop) **avbryter pointer-capture i samma stund ett fångat element omsorteras i DOM** → `pointercancel` dödade draget direkt.
+- **Lösning:** drag sker nu via `transform` istället för DOM-flytt. Det dragna kortet följer fingret med `translateY` (egen `transition:none`), grannarna glider ±en korthöjd för att öppna en lucka (`shiftNeighbors()`, CSS-transition på `.proj`). Ingen DOM-mutation sker under draget → capture behålls hela vägen. Arrayen `s.projects` sorteras om **en gång vid släpp** (`splice` index→target). Mål-index = `index + round(dy / slotH)`, där `slotH` = kortets höjd + 10 px marginal.
+- **`VER` bumpad 1.10 → 1.11**, `sw.js`-cache `todonu-v4` → `todonu-v5`.
 
 ### Kvar / nästa steg
 Oförändrat: morgonnotis väg 2 (Periodic Background Sync) om in-app-hälsningen inte räcker. Teknisk skuld oförändrad (helrendering via `innerHTML`, lokal lagring utan synk) — se `STATUS.md`.
