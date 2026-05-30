@@ -2,13 +2,13 @@
 
 > Pending idéer och öppna frågor. Läs den här vid sessionsstart. Lägg till nya idéer direkt när de dyker upp. När en idé byggs → flytta till `LOG.md` och uppdatera `STATUS.md`.
 
-**Senast uppdaterad:** 2026-05-30 (efter Handlingslistan, v1.13)
+**Senast uppdaterad:** 2026-05-30 (inline-redigering överallt, v1.15)
 
 ## Öppna frågor (kräver beslut)
 
 - ~~**Räcker in-app morgonhälsningen?**~~ **Avgjort 2026-05-30: ja, den räcker.** Ägaren nöjd med in-app-kortet vid appöppning. Aktiv notis (Periodic Background Sync) byggs inte — roadmap-punkt 2 stängd.
 - **Konto/synk — behövs det, eller räcker lokalt per enhet?** Utlöser i så fall arkitektur-tripwiren → Vite + ev. Supabase.
-- **Ska inline-panelen stanna öppen för flera tillägg?** Idag (v1.8) stänger panelen efter varje `＋ uppgift`/`＋ idé` i projekt/inkorg (ägarens val "panel underifrån"). Om man ofta vill lägga flera i rad på samma ställe kan den hållas öppen och återfokusera. Avvakta ägarens upplevelse.
+- ~~**Ska inline-panelen stanna öppen för flera tillägg?**~~ **Avgjort 2026-05-30 (v1.15): ja.** Hela add/edit-flödet för uppgifter/idéer (och handlingslistan) är nu inline (Keep-stil) — `＋ uppgift`/`＋ idé` öppnar ett fält direkt i listan som **håller sig öppet för nästa post** (Enter lägger till och fokuserar om), och klick på text redigerar inline. Den gamla "panel underifrån"/`openSheet`-vägen är borta för dessa. (Delsteg + projektnamn använder fortfarande rutan.)
 
 ## Roadmap-idéer (ej byggda)
 
