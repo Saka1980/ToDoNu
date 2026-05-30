@@ -209,7 +209,7 @@ function render(){
   const app=document.getElementById("app");
   const td=today();
   let h='<div class="top">';
-  h+=(s.view==="detail"||s.view==="capture")?'<button class="back" onclick="go(\'list\')"><span class="ba">‹</span>Tillbaka</button>':'<span class="logo"><span class="ver">v'+VER+'</span>ToDo<i>Nu</i></span>';
+  h+=(s.view==="detail"||s.view==="capture"||s.view==="action")?'<button class="back" onclick="go(\'list\')"><span class="ba">‹</span>Tillbaka</button>':'<span class="logo"><span class="ver">v'+VER+'</span>ToDo<i>Nu</i></span>';
   h+='<div class="glow"><span class="fl '+(s.stats.streak>0?"lit":"")+'">🔥</span><span>'+s.stats.streak+'</span>'+(s.stats.todayDate===td&&s.stats.todayCount>0?'<em>· '+s.stats.todayCount+' klara idag</em>':'')+'</div></div>';
 
   if(s.view==="list"){
@@ -222,6 +222,8 @@ function render(){
     if(loadError)h+='<div class="warn"><div class="wt">⚠ Kunde inte läsa sparad data</div>Inget har skrivits över — en råkopia av den oläsbara filen är sparad på enheten. Ladda ner den, eller återställ från en tidigare säkerhetskopia.<div class="wbtns"><button class="wbtn" onclick="exportRaw()">↓ Ladda ner råkopia</button><button class="wbtn alt" onclick="pickImport()">↑ Importera backup</button></div></div>';
     h+=(showMorning?morningDigest():'<div class="hero"><p class="greet">'+greeting()+'.</p><p class="digest">'+(dueT>0?dueT+(dueT===1?" uppgift väntar.":" uppgifter väntar."):"Inget brådskar — fånga en tanke.")+'</p></div>');
     if(inbox.length>0)h+='<button class="cardbtn inbox" onclick="openProj(\'inbox\')"><div class="cic">📥</div><div class="cmain"><span class="cname">Inkorg</span><span class="csub">'+inbox.length+' osorterade</span></div><span class="carr">→</span></button>';
+    const aOpen=s.actions.filter(a=>!a.done).length;
+    h+='<button class="cardbtn" onclick="go(\'action\')"><div class="cic">✓</div><div class="cmain"><span class="cname">Handlingslista</span><span class="csub">'+(aOpen>0?aOpen+" kvar":"Tom")+'</span></div><span class="carr">→</span></button>';
     h+='<div class="sec">Projekt</div>';
     h+='<div id="projlist">';
     s.projects.forEach(p=>{const st=pstats(p.id);h+='<div class="cardbtn proj" data-pid="'+p.id+'" role="button" tabindex="0" onclick="openProj(\''+p.id+'\')"><div class="cic"><span class="dot"></span></div><div class="cmain"><span class="cname">'+esc(p.name)+'</span><span class="csub">'+st.tasks+' uppgifter · '+st.ideas+' idéer</span></div><span class="grip" title="Dra för att flytta" aria-label="Flytta projekt" onclick="event.stopPropagation()">≡</span><span class="carr">→</span></div>'});
