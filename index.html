@@ -43,10 +43,11 @@ body{background:var(--bg);color:var(--ink);font-family:'Space Mono',monospace;mi
 .cic .dot{width:14px;height:14px;border-radius:50%;background:radial-gradient(circle,var(--ember),#7a2d12)}
 .cmain{flex:1;min-width:0}.cname{display:block;font-size:16px}.csub{display:block;font-size:12px;color:var(--faint);margin-top:3px}
 .carr{color:var(--faint);flex:none;font-size:16px}
-.grip{flex:none;display:flex;align-items:center;justify-content:center;width:40px;height:40px;margin:-10px -4px -10px 0;color:var(--faint);font-size:18px;line-height:1;cursor:grab;touch-action:none;border-radius:10px}
-.grip:hover{color:var(--soft)}.grip:active{cursor:grabbing}
+.grip{flex:none;display:flex;align-items:center;justify-content:center;width:46px;height:46px;margin:-12px -6px -12px 0;color:var(--soft);font-size:20px;line-height:1;cursor:grab;touch-action:none;border-radius:10px;letter-spacing:-1px}
+.grip:hover{color:var(--ink);background:var(--bg2)}.grip:active{cursor:grabbing}
 .proj{transition:transform .15s ease,box-shadow .12s,border-color .12s}
-.proj.dragging{border-color:var(--soft);box-shadow:0 16px 32px -10px rgba(0,0,0,.7);position:relative;z-index:5;cursor:grabbing}
+.proj.dragging{border-color:var(--ember);box-shadow:0 16px 32px -10px rgba(0,0,0,.7);position:relative;z-index:5;cursor:grabbing}
+body.draglock{overflow:hidden;touch-action:none;overscroll-behavior:none}
 .newproj{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:none;border:1px dashed var(--line);color:var(--soft);border-radius:16px;padding:14px;cursor:pointer;font-family:inherit;font-size:14px;margin-top:4px;transition:.15s}
 .newproj:hover{border-color:var(--soft);color:var(--ink)}
 .tools{display:flex;gap:16px;justify-content:center;margin:26px 4px 4px;flex-wrap:wrap}
@@ -131,7 +132,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Space Mono',monospace;mi
 <div id="app"></div>
 <script>
 const KEY="nu-projekt-v1";
-const VER="1.11";
+const VER="1.12";
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const isoD=d=>d.toISOString().slice(0,10);
 const today=()=>isoD(new Date());
@@ -279,27 +280,31 @@ function toggleMore(btn){
   t.classList.toggle("clamp");
   btn.textContent=t.classList.contains("clamp")?"visa mer":"visa mindre";
 }
+// Dra projekt: lyssnar på document (mus/touch levererar alltid move-event dit
+// — inget beroende av pointer-capture som tappades på touch/desktop tidigare).
+// Kortet flyttas via transform, grannarna glider, sidan låses mot scroll under
+// draget, och s.projects sorteras om en gång vid släpp.
+let dragMoveH=null,dragUpH=null;
 function setupProjectDrag(){
   const list=document.getElementById("projlist");if(!list)return;
-  list.querySelectorAll(".grip").forEach(g=>{g.onpointerdown=gripDown});
+  list.addEventListener("pointerdown",onListPointerDown);
 }
-// Dra via transform — ingen DOM-flytt under draget (annars avbryter Chrome
-// pointer-capture). Neighbors glider för att öppna en lucka; arrayen sorteras
-// om en gång vid släpp.
-function gripDown(e){
-  if(drag)return;
-  const card=e.currentTarget.closest(".proj");if(!card)return;
-  const list=document.getElementById("projlist");if(!list)return;
+function onListPointerDown(e){
+  if(drag||e.button>0)return;
+  const g=e.target.closest(".grip");if(!g)return;
+  const card=g.closest(".proj");if(!card)return;
+  const list=card.parentNode;
   e.preventDefault();
   const cards=[...list.querySelectorAll(".proj")];
   const index=cards.indexOf(card);
   const slotH=card.offsetHeight+10; // .cardbtn margin-bottom:10
   drag={el:card,id:e.pointerId,startY:e.clientY,cards,index,target:index,slotH,moved:false};
-  const g=e.currentTarget;
-  try{g.setPointerCapture(e.pointerId)}catch(_){}
-  card.classList.add("dragging");
-  card.style.transition="none";
-  g.onpointermove=gripMove;g.onpointerup=gripUp;g.onpointercancel=gripUp;
+  card.classList.add("dragging");card.style.transition="none";
+  document.body.classList.add("draglock");
+  dragMoveH=gripMove;dragUpH=gripUp;
+  document.addEventListener("pointermove",dragMoveH,{passive:false});
+  document.addEventListener("pointerup",dragUpH);
+  document.addEventListener("pointercancel",dragUpH);
 }
 function shiftNeighbors(){
   const {cards,index,target,slotH,el}=drag;
@@ -315,6 +320,7 @@ function gripMove(e){
   if(!drag||e.pointerId!==drag.id)return;
   const dy=e.clientY-drag.startY;
   if(!drag.moved){if(Math.abs(dy)<4)return;drag.moved=true}
+  if(e.cancelable)e.preventDefault();
   drag.el.style.transform="translateY("+dy+"px)";
   let t=drag.index+Math.round(dy/drag.slotH);
   t=Math.max(0,Math.min(drag.cards.length-1,t));
@@ -322,9 +328,10 @@ function gripMove(e){
 }
 function gripUp(e){
   if(!drag||e.pointerId!==drag.id)return;
-  const g=e.currentTarget;
-  try{g.releasePointerCapture(e.pointerId)}catch(_){}
-  g.onpointermove=g.onpointerup=g.onpointercancel=null;
+  document.removeEventListener("pointermove",dragMoveH);
+  document.removeEventListener("pointerup",dragUpH);
+  document.removeEventListener("pointercancel",dragUpH);
+  document.body.classList.remove("draglock");
   const {el,cards,index,target,moved}=drag;
   cards.forEach(c=>{c.style.transform="";c.style.transition=""});
   el.classList.remove("dragging");
@@ -332,7 +339,7 @@ function gripUp(e){
   if(moved&&target!==index){
     const[p]=s.projects.splice(index,1);
     s.projects.splice(target,0,p);
-    suppressOpen=true;setTimeout(()=>{suppressOpen=false},80);
+    suppressOpen=true;setTimeout(()=>{suppressOpen=false},120);
     save();render();
   }
 }
