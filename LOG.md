@@ -4,6 +4,18 @@ Kronologisk logg över vad vi byggt och *varför*. Nyaste överst när nya rader
 
 ---
 
+## 2026-05-30 — Tionde sessionen (flikar i detaljvyn + delsteg inline)
+
+Telefon-test gav två önskemål: (1) **delstegen** öppnade fortfarande den gamla rutan istället för inline (jag hade medvetet lämnat dem på `openSheet`); (2) när en uppgiftslista växer hamnar **Idéer-sektionen långt ner** och blir svår att hitta.
+
+- **Designdiskussion (med ägaren):** för (2) övervägdes hopfällbara sektioner, idéer-högst-upp, och **flikar**. Ägaren valde flikar efter att vi rett ut hur tillägg funkar (svar: "＋"-knappen följer aktiv flik, så man lägger aldrig fel sort).
+- **Byggt (allt i `index.html`):**
+  1. **Flikar i detaljvyn:** Uppgifter/Idéer visas ett spår i taget via en flikbar med antal ("Uppgifter (N)" / "💡 Idéer (M)"). `detailTab`-state, `setTab()`, default `task`, återställs i `openProj`. Antalen gör att man ser att idéer *finns* även på uppgiftsfliken. CSS `.tabs`/`.tab` (amber aktiv för uppgifter, idé-blå för idéer). De gamla `.shead`-rubrikerna i detaljvyn togs bort (flikarna är rubriken).
+  2. **Delsteg inline:** `addStep`/`editStep` borttagna; det generella inline-systemet utökat med `what:'step'` och ett `taskId` i `inline`-statet (binder fältet till rätt uppgift). `isAdd/isEdit` tar nu valfritt `taskId`; `commitAdd/commitEdit/inlineTitle` hanterar steg; `flushInline` bevarar `taskId` vid kontinuerligt tillägg. `removeStep` rensar `inline` om man raderar steget man redigerar. CSS `.step .inlinefield` (mindre font). **Endast projektnamn** (`addProject`) använder nu kvar `openSheet`.
+- **Verifierad i riktig Chrome (CDP, 31 assertions, alla gröna):** flikväxling (rätt spår syns/döljs, antal stämmer, "＋" följer fliken, default + reset vid återöppning), delsteg inline (add kontinuerligt, edit förifyllt, radera ×, ingen sheet), + regression (completeTask firar fortf., Klart-grupp, inbox-flytt, handlingslista-add). Inga JS-fel. `VER` 1.16→1.17, `sw.js` `todonu-v10`→`todonu-v11`. Engångsskript raderat.
+
+---
+
 ## 2026-05-30 — Nionde sessionen (Klart-grupp + flytta inkorg→projekt)
 
 Efter ett **rent snack-pass** (ingen kod) om modularisering vs. funktioner landade vi i två verkliga glapp i inkorgs-loopen, båda lösta genom att återanvända befintliga mönster — och avfärdade samtidigt kod-uppdelning nu (premature; spara till synk/Vite-tripwiren) samt deadline/påminnelse/taggar (krockar med lågpress-själen).

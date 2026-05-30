@@ -25,7 +25,7 @@ Det är medvetet **inte**: en kalender, en sträng deadline-app, eller en funkti
 
 ## Funktioner
 
-**Projekt** är pågående samlingar (inte tidsbegränsade). Ordningen i projektlistan är **användarstyrd** — dra i greppikonen `≡` på ett projektkort för att flytta det upp/ned (touch via Pointer Events; ordningen ligger implicit i `s.projects`-arrayen, ingen separat sorteringsnyckel). Varje projekt har två separata spår:
+**Projekt** är pågående samlingar (inte tidsbegränsade). Ordningen i projektlistan är **användarstyrd** — dra i greppikonen `≡` på ett projektkort för att flytta det upp/ned (touch via Pointer Events; ordningen ligger implicit i `s.projects`-arrayen, ingen separat sorteringsnyckel). Varje projekt (och inkorgen) har två separata spår, växlade med **flikar högst upp** ("Uppgifter (N)" / "💡 Idéer (M)", v1.17) — ett spår visas i taget med antal, "＋"-knappen följer aktiv flik, Uppgifter är default. (Löser att idéer hamnade långt ner när uppgiftslistan växte.)
 - **Uppgifter** — sånt att bocka av.
 - **Idéer** — tankar att återkomma till. En idé kan "promotas" till en uppgift ("Gör"-knappen).
 
@@ -58,7 +58,7 @@ action  = { id, title, done, createdAt, completedAt? }  // post i Handlingslista
 stats   = { streak, lastActive, todayDate, todayCount, ideasRealized }
 ```
 
-**Deluppgifter (`steps`)** — *byggd 2026-05-29.* Lättviktig checklista, frivillig och bakåtkompatibel (saknat fält = ingen checklista). Endast uppgifter, ej idéer. **Delsteg är frikopplade från uppgiftens klar-status** — alla delsteg klara gör *inte* uppgiften klar (progress blir grön vid x/x; man bockar själv av uppgiften när man tycker den är klar). Bockar man av huvuduppgiften markeras kvarvarande steg klara. Titlar (uppgift/idé/steg) redigeras genom att klicka på texten — för **uppgifter och idéer sker både tillägg (＋-knappen) och redigering inline** (Keep-stil, samma fält som handlingslistan, v1.15); **delsteg och projektnamn använder fortfarande rutan (`openSheet`)**. Delsteg belönas **tyst** (ingen gnista/pling/streak, tickar inte `todayCount`) — bara huvuduppgiften firar, för att hålla lågpress-tonen. Vald framför nästlade uppgifter av samma skäl.
+**Deluppgifter (`steps`)** — *byggd 2026-05-29.* Lättviktig checklista, frivillig och bakåtkompatibel (saknat fält = ingen checklista). Endast uppgifter, ej idéer. **Delsteg är frikopplade från uppgiftens klar-status** — alla delsteg klara gör *inte* uppgiften klar (progress blir grön vid x/x; man bockar själv av uppgiften när man tycker den är klar). Bockar man av huvuduppgiften markeras kvarvarande steg klara. Titlar (uppgift/idé/steg) redigeras genom att klicka på texten — för **uppgifter, idéer OCH delsteg sker både tillägg (＋-knappen) och redigering inline** (Keep-stil, samma fält som handlingslistan; uppgifter/idéer v1.15, delsteg v1.17); **endast projektnamn använder fortfarande rutan (`openSheet`)**. Inline-systemet bärs av ett `inline`-state `{op, what:'action'|'task'|'idea'|'item'|'step', id?, taskId?}`. Delsteg belönas **tyst** (ingen gnista/pling/streak, tickar inte `todayCount`) — bara huvuduppgiften firar, för att hålla lågpress-tonen. Vald framför nästlade uppgifter av samma skäl.
 
 ## Glöd (belöningssystem)
 

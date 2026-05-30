@@ -2,7 +2,7 @@
 
 > Pending idéer och öppna frågor. Läs den här vid sessionsstart. Lägg till nya idéer direkt när de dyker upp. När en idé byggs → flytta till `LOG.md` och uppdatera `STATUS.md`.
 
-**Senast uppdaterad:** 2026-05-30 (Klart-grupp + flytta inkorg→projekt, v1.16)
+**Senast uppdaterad:** 2026-05-30 (flikar i detaljvyn + delsteg inline, v1.17)
 
 ## Öppna frågor (kräver beslut)
 
