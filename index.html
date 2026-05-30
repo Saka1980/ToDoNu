@@ -154,7 +154,7 @@ let audio=null;
 let loadError=false;
 let capMsg="";
 let drag=null,suppressOpen=false;
-let actionsCollapsed=true;
+let actionsCollapsed=true,doneCollapsed=true;
 let inline=null,inlineFlushing=false;
 
 function seedIfEmpty(){
@@ -222,6 +222,8 @@ function editStep(taskId,stepId){const it=s.items.find(x=>x.id===taskId);if(!it|
 function removeAction(id){if(isEdit("action",id))inline=null;s.actions=s.actions.filter(x=>x.id!==id);save();render()}
 function clearDoneActions(){s.actions=s.actions.filter(a=>!a.done);save();render()}
 function toggleActionsCollapse(){actionsCollapsed=!actionsCollapsed;render()}
+function toggleDoneCollapse(){doneCollapsed=!doneCollapsed;render()}
+function clearDoneTasks(){const isInbox=s.cur==="inbox";s.items=s.items.filter(i=>!(i.type==="task"&&i.done&&(isInbox?!i.projectId:i.projectId===s.cur)));save();render()}
 function toggleAction(id){const a=s.actions.find(x=>x.id===id);if(!a)return;a.done=!a.done;if(a.done)a.completedAt=Date.now();else delete a.completedAt;save();render()}
 function toggleStep(taskId,stepId){const it=s.items.find(x=>x.id===taskId);if(!it||!it.steps)return;const st=it.steps.find(x=>x.id===stepId);if(!st)return;st.done=!st.done;const row=document.getElementById("step_"+taskId+"_"+stepId);if(row){row.classList.toggle("done",st.done);const c=row.querySelector(".scheck");if(c){c.classList.toggle("on",st.done);c.textContent=st.done?"✓":""}}const dn=it.steps.filter(x=>x.done).length;const pr=document.getElementById("prog_"+taskId);if(pr){pr.textContent=dn+"/"+it.steps.length;pr.classList.toggle("all",dn===it.steps.length&&dn>0)}save()}
 function addProject(){openSheet("Nytt projekt","",val=>{const id=uid();s.projects.push({id,name:val,createdAt:Date.now()});s.cur=id;s.view="detail";save();render()})}
@@ -292,9 +294,18 @@ function render(){
       if(hasSteps)t.steps.forEach(st=>{h+='<div class="step'+(st.done?' done':'')+'" id="step_'+t.id+'_'+st.id+'"><button class="scheck'+(st.done?' on':'')+'" onclick="toggleStep(\''+t.id+'\',\''+st.id+'\')">'+(st.done?'✓':'')+'</button><div class="icontent"><span class="stitle clampable clamp" onclick="editStep(\''+t.id+'\',\''+st.id+'\')">'+esc(st.title)+'</span><button class="moretoggle" hidden onclick="toggleMore(this)">visa mer</button></div><button class="sdel" onclick="removeStep(\''+t.id+'\',\''+st.id+'\')">×</button></div>'});
       h+='<button class="addstep" onclick="addStep(\''+t.id+'\')">＋ steg</button></div>';
     });
-    tasks.filter(t=>t.done).forEach(t=>{h+='<div class="item done"><button class="check on" onclick="uncomplete(\''+t.id+'\')">✓</button><div class="icontent">'+(isEdit("item",t.id)?inlineField():'<span class="ititle clampable clamp" onclick="startEdit(\'item\',\''+t.id+'\')">'+esc(t.title)+'</span><button class="moretoggle" hidden onclick="toggleMore(this)">visa mer</button>')+'</div><button class="del" onclick="removeItem(\''+t.id+'\')">🗑</button></div>'});
     if(isAdd("task"))h+='<div class="item adding"><span class="addghost"></span>'+inlineField("Skriv en uppgift…")+'</div>';
     else h+='<button class="addhere" onclick="startAdd(\'task\')">＋ uppgift</button>';
+    const doneTasks=tasks.filter(t=>t.done);
+    if(doneTasks.length>0){
+      h+='<button class="donehead" onclick="toggleDoneCollapse()">'+(doneCollapsed?'▸':'▾')+' Klart ('+doneTasks.length+')</button>';
+      if(!doneCollapsed){
+        h+='<div class="donegroup">';
+        doneTasks.forEach(t=>{h+='<div class="item done"><button class="check on" onclick="uncomplete(\''+t.id+'\')">✓</button><div class="icontent">'+(isEdit("item",t.id)?inlineField():'<span class="ititle clampable clamp" onclick="startEdit(\'item\',\''+t.id+'\')">'+esc(t.title)+'</span><button class="moretoggle" hidden onclick="toggleMore(this)">visa mer</button>')+'</div><button class="del" onclick="removeItem(\''+t.id+'\')">🗑</button></div>'});
+        h+='<button class="tlink" onclick="clearDoneTasks()">Rensa klart</button>';
+        h+='</div>';
+      }
+    }
     h+='</div><div class="stream"><div class="shead idea">💡 Idéer</div>';
     if(ideas.length===0)h+='<p class="emptyline">Inga idéer än.</p>';
     ideas.forEach(t=>{h+='<div class="item idea"><span class="ideadot"></span><div class="icontent">'+(isEdit("item",t.id)?inlineField():'<span class="ititle clampable clamp" onclick="startEdit(\'item\',\''+t.id+'\')">'+esc(t.title)+'</span><button class="moretoggle" hidden onclick="toggleMore(this)">visa mer</button>')+'</div><button class="promote" title="Gör till uppgift" onclick="promote(\''+t.id+'\')">→</button><button class="del" onclick="removeItem(\''+t.id+'\')">🗑</button></div>'});
