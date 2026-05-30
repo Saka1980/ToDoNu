@@ -22,6 +22,15 @@ Kronologisk logg över vad vi byggt och *varför*. Nyaste överst när nya rader
 - **Verifiering:** drev riktig Chrome headless via DevTools-protokollet (Node 24:s inbyggda `WebSocket`/`fetch`, inga npm-installationer) och dispatchade riktiga muspekar-event. Testade tre fall — dra ned (Alpha→botten), dra upp (sista→toppen) och vanligt tryck (öppnar projektet). **Alla tre gröna, inga JS-fel.** Engångs-testskriptet togs bort efteråt.
 - **`VER` bumpad 1.10 → 1.12**, `sw.js`-cache `todonu-v4` → `todonu-v6`.
 
+### Lärdomar (varför det krävdes tre försök — undvik framöver)
+
+Två fel, ett tekniskt och ett i arbetssättet:
+
+1. **Tekniskt — fel grundval för pekar-drag.** Jag byggde draget på `setPointerCapture` + händelser bundna på det dragna elementet. Det är skört: (a) flyttar man elementet i DOM under draget (`insertBefore`) avbryter Chrome capturen → `pointercancel`; (b) även utan DOM-flytt levererades inte move-eventen pålitligt (touch lät scroll-gesten ta pointern, desktop fick dem aldrig). **Regel:** bygg drag/swipe på **`document`-lyssnare** för `pointermove`/`pointerup` (capture-oberoende, fungerar mus+touch), lås scroll explicit (`touch-action:none` på handtaget + `body`-lås under draget), och undvik DOM-mutation mitt i en pågående pekargest — använd `transform` och commit:a en gång vid släpp.
+2. **Process — jag pushade utan att verifiera beteendet.** De två första gångerna körde jag bara `node --check` (syntax) och antog att det funkade. Syntaxkontroll fångar **aldrig** event-/capture-/scroll-buggar. Jag hade dessutom verktyget hela tiden (headless Chrome via CDP, noll installationer) men använde det först på tredje försöket. **Regel:** för allt som är interaktivt beteende (drag, pekare, fokus, scroll, animationer) räknas *bara* en körning i en riktig webbläsare som verifiering — kör den **före** commit/push, inte efter att ägaren rapporterat fel. Syntax-OK ≠ "funkar".
+
+(UX-not: ägaren antog först att hela projektkortet skulle gå att dra, inte bara `≡`. Det visade sig funka perfekt med greppet när man förstod det — men *upptäckbarheten* av handtaget kan vara värd att höja om frågan dyker upp igen, t.ex. tydligare ikon/hint.)
+
 ### Kvar / nästa steg
 Oförändrat: morgonnotis väg 2 (Periodic Background Sync) om in-app-hälsningen inte räcker. Teknisk skuld oförändrad (helrendering via `innerHTML`, lokal lagring utan synk) — se `STATUS.md`.
 
