@@ -4,6 +4,22 @@ Kronologisk logg över vad vi byggt och *varför*. Nyaste överst när nya rader
 
 ---
 
+## 2026-05-30 — Sjunde sessionen (dra-och-släpp-ordning på projekt)
+
+Ägaren ville kunna **hålla i och flytta projekt upp/ned** — dra-och-släpp för att ändra ordningen i projektlistan.
+
+- **Designbeslut (med ägaren):** webbläsarens inbyggda HTML5-`draggable` funkar i praktiken inte på touch, och appen används mest på Pixel. Två modeller övervägdes: greppikon (≡) vs. håll-inne (long-press). Ägaren valde **greppikon (≡)** — mest pålitligt på mobil, ingen krock mellan tryck (öppna), scroll och dra.
+- **Ingen datamodell-ändring:** ordningen ligger redan implicit i `s.projects`-arrayen. Att flytta i arrayen + `save()` räcker; `load()` bevarar ordningen.
+- **Byggt (allt i `index.html`):**
+  - **Markup:** projektkorten wrappas i `<div id="projlist">`; varje kort blev `<div class="cardbtn proj" data-pid=…>` (knapp-i-knapp är ogiltig HTML när greppet är en egen knapp). Greppikon `≡` med `onclick="event.stopPropagation()"` → tryck på greppet öppnar aldrig projektet. Inkorgskortet och "Nytt projekt" ligger utanför containern (ej flyttbara).
+  - **Touch-drag (Pointer Events, vanilla):** `setupProjectDrag()` binder `pointerdown` på varje grepp efter varje render. `setPointerCapture` på greppet, kortet får `.dragging` (lyft-look). `pointermove` → live-omsortering i DOM efter fingrets Y (`dragAfter()`, klassiskt midpoint-mönster). `pointerup/cancel` → läs av DOM-ordningen, sortera `s.projects` därefter, `save()`+`render()`. `suppressOpen`-flagga (~80 ms) hindrar att släppet av misstag öppnar ett projekt. 4px-tröskel skiljer dra från statiskt tryck. Fungerar även med mus (snabbtest på dator).
+- **`VER` bumpad 1.9 → 1.10**, `sw.js`-cache `todonu-v3` → `todonu-v4`.
+
+### Kvar / nästa steg
+Oförändrat: morgonnotis väg 2 (Periodic Background Sync) om in-app-hälsningen inte räcker. Teknisk skuld oförändrad (helrendering via `innerHTML`, lokal lagring utan synk) — se `STATUS.md`.
+
+---
+
 ## 2026-05-30 — Sjätte sessionen (textvisning & rad-design + README)
 
 Ägartest på mobil (skärmdump av projektet "Clara Via app") visade tre konkreta svagheter i hur text och rader renderas: (1) "Gör"- och papperskorgsknappen stal textens bredd → långa idéer wrappade till 6–7 rader, få kort fick plats; (2) långa texter gick inte att överblicka; (3) tryck på text öppnade redigering i ett **enradigt** `<input>` → lång text scrollade bara i sidled. Ägaren ville ha en fix **rakt igenom** (uppgifter, idéer, klara uppgifter *och* delsteg), inte bara idéer.

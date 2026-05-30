@@ -25,7 +25,7 @@ Det är medvetet **inte**: en kalender, en sträng deadline-app, eller en funkti
 
 ## Funktioner
 
-**Projekt** är pågående samlingar (inte tidsbegränsade). Varje projekt har två separata spår:
+**Projekt** är pågående samlingar (inte tidsbegränsade). Ordningen i projektlistan är **användarstyrd** — dra i greppikonen `≡` på ett projektkort för att flytta det upp/ned (touch via Pointer Events; ordningen ligger implicit i `s.projects`-arrayen, ingen separat sorteringsnyckel). Varje projekt har två separata spår:
 - **Uppgifter** — sånt att bocka av.
 - **Idéer** — tankar att återkomma till. En idé kan "promotas" till en uppgift ("Gör"-knappen).
 

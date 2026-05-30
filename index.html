@@ -43,6 +43,10 @@ body{background:var(--bg);color:var(--ink);font-family:'Space Mono',monospace;mi
 .cic .dot{width:14px;height:14px;border-radius:50%;background:radial-gradient(circle,var(--ember),#7a2d12)}
 .cmain{flex:1;min-width:0}.cname{display:block;font-size:16px}.csub{display:block;font-size:12px;color:var(--faint);margin-top:3px}
 .carr{color:var(--faint);flex:none;font-size:16px}
+.grip{flex:none;display:flex;align-items:center;justify-content:center;width:40px;height:40px;margin:-10px -4px -10px 0;color:var(--faint);font-size:18px;line-height:1;cursor:grab;touch-action:none;border-radius:10px}
+.grip:hover{color:var(--soft)}.grip:active{cursor:grabbing}
+.proj{transition:box-shadow .12s,opacity .12s,border-color .12s}
+.proj.dragging{opacity:.94;border-color:var(--soft);box-shadow:0 16px 32px -10px rgba(0,0,0,.7);position:relative;z-index:5}
 .newproj{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:none;border:1px dashed var(--line);color:var(--soft);border-radius:16px;padding:14px;cursor:pointer;font-family:inherit;font-size:14px;margin-top:4px;transition:.15s}
 .newproj:hover{border-color:var(--soft);color:var(--ink)}
 .tools{display:flex;gap:16px;justify-content:center;margin:26px 4px 4px;flex-wrap:wrap}
@@ -127,7 +131,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Space Mono',monospace;mi
 <div id="app"></div>
 <script>
 const KEY="nu-projekt-v1";
-const VER="1.9";
+const VER="1.10";
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const isoD=d=>d.toISOString().slice(0,10);
 const today=()=>isoD(new Date());
@@ -138,6 +142,7 @@ let cap={draft:"",dest:"inbox",kind:"task"};
 let audio=null;
 let loadError=false;
 let capMsg="";
+let drag=null,suppressOpen=false;
 
 function seedIfEmpty(){
   s.projects=[{id:"p_studie",name:"StudiePlan",createdAt:Date.now()}];
@@ -183,7 +188,7 @@ function pickImport(){const inp=document.createElement("input");inp.type="file";
 function importData(file){const r=new FileReader();r.onload=()=>{let d;try{const parsed=JSON.parse(r.result);d=parsed&&parsed.data?parsed.data:parsed}catch(e){alert("Kunde inte läsa filen – är det en ToDoNu-backup?");return}if(!d||!Array.isArray(d.projects)){alert("Filen ser inte ut som en ToDoNu-backup.");return}if(!confirm("Importera ersätter all data på den här enheten. Fortsätt?"))return;s.projects=d.projects;s.items=Array.isArray(d.items)?d.items:[];s.stats=Object.assign({streak:0,lastActive:"",todayDate:"",todayCount:0,ideasRealized:0},d.stats||{});loadError=false;s.view="list";s.cur=null;save();render()};r.onerror=()=>alert("Kunde inte läsa filen.");r.readAsText(file)}
 function exportRaw(){const raw=localStorage.getItem(KEY+"-korrupt")||"";const blob=new Blob([raw],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="todonu-rakopia-"+today()+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)}
 function go(v){capMsg="";s.view=v;if(v==="capture"){cap.draft="";render();setTimeout(()=>{const f=document.getElementById("field");if(f)try{f.focus()}catch(e){}},60);return}render()}
-function openProj(id){s.cur=id;s.view="detail";render()}
+function openProj(id){if(suppressOpen)return;s.cur=id;s.view="detail";render()}
 
 function toggleExtra(){const el=document.getElementById("extra");if(el)el.style.display=cap.draft.trim()?"":"none"}
 function greeting(){const h=new Date().getHours();return h<10?"God morgon":h<18?"Hej":"God kväll"}
@@ -216,7 +221,9 @@ function render(){
     h+=(showMorning?morningDigest():'<div class="hero"><p class="greet">'+greeting()+'.</p><p class="digest">'+(dueT>0?dueT+(dueT===1?" uppgift väntar.":" uppgifter väntar."):"Inget brådskar — fånga en tanke.")+'</p></div>');
     if(inbox.length>0)h+='<button class="cardbtn inbox" onclick="openProj(\'inbox\')"><div class="cic">📥</div><div class="cmain"><span class="cname">Inkorg</span><span class="csub">'+inbox.length+' osorterade</span></div><span class="carr">→</span></button>';
     h+='<div class="sec">Projekt</div>';
-    s.projects.forEach(p=>{const st=pstats(p.id);h+='<button class="cardbtn" onclick="openProj(\''+p.id+'\')"><div class="cic"><span class="dot"></span></div><div class="cmain"><span class="cname">'+esc(p.name)+'</span><span class="csub">'+st.tasks+' uppgifter · '+st.ideas+' idéer</span></div><span class="carr">→</span></button>'});
+    h+='<div id="projlist">';
+    s.projects.forEach(p=>{const st=pstats(p.id);h+='<div class="cardbtn proj" data-pid="'+p.id+'" role="button" tabindex="0" onclick="openProj(\''+p.id+'\')"><div class="cic"><span class="dot"></span></div><div class="cmain"><span class="cname">'+esc(p.name)+'</span><span class="csub">'+st.tasks+' uppgifter · '+st.ideas+' idéer</span></div><span class="grip" title="Dra för att flytta" aria-label="Flytta projekt" onclick="event.stopPropagation()">≡</span><span class="carr">→</span></div>'});
+    h+='</div>';
     h+='<button class="newproj" onclick="addProject()">＋ Nytt projekt</button>';
     h+='<div class="tools"><button class="tlink" onclick="exportData()">↓ Exportera säkerhetskopia</button><button class="tlink" onclick="pickImport()">↑ Importera</button></div></div>';
   }
@@ -258,6 +265,7 @@ function render(){
   if(s.view==="list")h+='<button class="fab" onclick="go(\'capture\')">＋</button>';
   app.innerHTML=h;
   applyClamps();
+  setupProjectDrag();
 }
 function applyClamps(){
   document.querySelectorAll(".icontent").forEach(blk=>{
@@ -270,6 +278,51 @@ function toggleMore(btn){
   const t=btn.parentNode.querySelector(".clampable");if(!t)return;
   t.classList.toggle("clamp");
   btn.textContent=t.classList.contains("clamp")?"visa mer":"visa mindre";
+}
+function setupProjectDrag(){
+  const list=document.getElementById("projlist");if(!list)return;
+  list.querySelectorAll(".grip").forEach(g=>{g.onpointerdown=gripDown});
+}
+function gripDown(e){
+  if(drag)return;
+  const card=e.currentTarget.closest(".proj");if(!card)return;
+  e.preventDefault();
+  drag={el:card,id:e.pointerId,startY:e.clientY,moved:false};
+  const g=e.currentTarget;
+  try{g.setPointerCapture(e.pointerId)}catch(_){}
+  card.classList.add("dragging");
+  g.onpointermove=gripMove;g.onpointerup=gripUp;g.onpointercancel=gripUp;
+}
+function dragAfter(list,y){
+  let best=null,bestOff=-Infinity;
+  list.querySelectorAll(".proj:not(.dragging)").forEach(c=>{
+    const b=c.getBoundingClientRect(),off=y-b.top-b.height/2;
+    if(off<0&&off>bestOff){bestOff=off;best=c}
+  });
+  return best;
+}
+function gripMove(e){
+  if(!drag||e.pointerId!==drag.id)return;
+  if(!drag.moved){if(Math.abs(e.clientY-drag.startY)<4)return;drag.moved=true}
+  const list=document.getElementById("projlist");if(!list)return;
+  const after=dragAfter(list,e.clientY);
+  if(after==null){if(list.lastElementChild!==drag.el)list.appendChild(drag.el)}
+  else if(after!==drag.el)list.insertBefore(drag.el,after);
+}
+function gripUp(e){
+  if(!drag||e.pointerId!==drag.id)return;
+  const g=e.currentTarget;
+  try{g.releasePointerCapture(e.pointerId)}catch(_){}
+  g.onpointermove=g.onpointerup=g.onpointercancel=null;
+  drag.el.classList.remove("dragging");
+  const moved=drag.moved;drag=null;
+  if(moved){
+    const list=document.getElementById("projlist");
+    const ids=[...list.querySelectorAll(".proj")].map(c=>c.dataset.pid);
+    s.projects.sort((a,b)=>ids.indexOf(a.id)-ids.indexOf(b.id));
+    suppressOpen=true;setTimeout(()=>{suppressOpen=false},80);
+    save();render();
+  }
 }
 async function persistStorage(){try{if(navigator.storage&&navigator.storage.persist)await navigator.storage.persist()}catch(e){}}
 function iosHint(){try{
