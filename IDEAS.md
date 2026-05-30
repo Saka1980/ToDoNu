@@ -30,3 +30,4 @@ Behåll vanilla tills någon tröskel slår till — då migrera till **Vite-SPA
 
 - En egen in-app mic-knapp (Web Speech) — borttagen, fungerade ej + låste micen på Android. Återinför endast med moln-STT.
 - Kalender, sträng deadline-app, funktionspackad projektledare — strider mot lågpress-tonen.
+- **Lösenordsvalv / lösenordshanterare** — *avgjort 2026-05-30: byggs inte.* Tekniskt görbart i vanilla (Web Crypto: PBKDF2 + AES-GCM, ingen backend), men `localStorage` är för skört för lösenord (vakuumeringsrisk, ingen synk/molnbackup → enhetshaveri = allt borta), inget autofyll/läckage-koll/granskad säkerhet, och falsk trygghet är värre än ingen. Krockar dessutom med appens lugna-fångst-själ. Ägaren använder en dedikerad hanterare (Google/Bitwarden/Proton) istället.

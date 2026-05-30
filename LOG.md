@@ -4,6 +4,12 @@ Kronologisk logg över vad vi byggt och *varför*. Nyaste överst när nya rader
 
 ---
 
+## 2026-05-30 — Beslut: lösenordsvalv avfärdat (inget byggt)
+
+Ägaren föreslog (tveksamt, "kanske inte här") ett krypterat lösenordsvalv i appen — åtkomst bara med rätt huvudlösenord. **Avgjort: byggs inte.** Tekniskt görbart i vanilla (Web Crypto: PBKDF2-härledd nyckel + AES-GCM, huvudlösenordet sparas aldrig, ingen backend) — men *runt* kryptot är allt för skört: `localStorage` kan vakuumeras + ingen synk/molnbackup → enhetshaveri = allt borta (för todos irriterande, för lösenord katastrof); inget autofyll/läckage-koll/granskad säkerhet; falsk trygghet är värre än ingen. Krockar dessutom med appens lugna-fångst-själ. Ägaren lägger riktiga lösenord i en dedikerad hanterare (Google/Bitwarden/Proton). Se `IDEAS.md` → "Medvetet INTE".
+
+---
+
 ## 2026-05-30 — Tionde sessionen (flikar i detaljvyn + delsteg inline)
 
 Telefon-test gav två önskemål: (1) **delstegen** öppnade fortfarande den gamla rutan istället för inline (jag hade medvetet lämnat dem på `openSheet`); (2) när en uppgiftslista växer hamnar **Idéer-sektionen långt ner** och blir svår att hitta.
