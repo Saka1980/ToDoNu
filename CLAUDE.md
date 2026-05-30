@@ -29,7 +29,9 @@ Det är medvetet **inte**: en kalender, en sträng deadline-app, eller en funkti
 - **Uppgifter** — sånt att bocka av.
 - **Idéer** — tankar att återkomma till. En idé kan "promotas" till en uppgift ("Gör"-knappen).
 
-**Inkorg** — snabb-dumpa utan att välja projekt, sortera senare. Man kan också lägga direkt i ett projekt vid fångst.
+**Inkorg** — snabb-dumpa utan att välja projekt, sortera senare. Man kan också lägga direkt i ett projekt vid fångst. **Sortera senare (v1.16):** inkorg-poster har en flytta-ikon (📁) som öppnar en väljare med projekten — tryck för att flytta posten in i ett projekt (`moveItem`/`openPicker`, ändrar bara `projectId`; typ + ev. delsteg följer med). Flytta-knappen finns **bara på inkorg-poster**, inte inne i projekt.
+
+**Klart-grupp (v1.16)** — i projekt/inkorg samlas avbockade uppgifter under en hopfällbar rubrik "Klart (N)" (efter ＋uppgift), samma mönster som handlingslistans markerade-grupp. Hopfälld som standard; "Rensa klart" tömmer de avbockade **i aktuell vy** (`clearDoneTasks` scopar på `s.cur`/inkorg). Endast uppgifter (idéer "blir inte klara"). Ren presentation — rör inte Glöd; avbockning firar precis som förut.
 
 **Handlingslista** — *byggd 2026-05-30 (v1.13).* En super-simpel Google Keep-liknande checklista, **helt fristående** från projekt/uppgifter/idéer. EN enda lista (fast namn "Handlingslista"), nås via ett kort under Inkorg på framsidan (alltid synligt, undertext "X kvar"/"Tom"), öppnar en egen vy (`s.view==="action"`). Bockbara punkter; avbockade får genomstruken text och sjunker ner under en hopfällbar rubrik "X markerade objekt" (Keep-stil). "＋ Post i listan" öppnar ett **inline-fält direkt i listan** (markören redan i raden, Enter lägger till och håller fältet öppet för nästa post; tomt Enter/Escape/blur stänger — ingen modal), och **klick på text redigerar inline** på samma sätt. `≡` drar för att ordna om (samma drag-motor som projektlistan), × raderar en rad och "Rensa avbockade" tömmer alla klara. **Avbockning är tyst** — rör inte Glöd/streak/`todayCount`, ingen gnista/pling (matchar lågpress-tonen och deluppgifternas tysta avbockning). Lagras i `s.actions[]`.
 

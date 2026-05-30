@@ -4,6 +4,18 @@ Kronologisk logg över vad vi byggt och *varför*. Nyaste överst när nya rader
 
 ---
 
+## 2026-05-30 — Nionde sessionen (Klart-grupp + flytta inkorg→projekt)
+
+Efter ett **rent snack-pass** (ingen kod) om modularisering vs. funktioner landade vi i två verkliga glapp i inkorgs-loopen, båda lösta genom att återanvända befintliga mönster — och avfärdade samtidigt kod-uppdelning nu (premature; spara till synk/Vite-tripwiren) samt deadline/påminnelse/taggar (krockar med lågpress-själen).
+
+- **Glappet vi hittade:** det fanns **ingen väg att flytta en post från inkorgen in i ett projekt** efter skapande (enda `projectId`-mutationen var `removeProject`). Det bröt inkorgens kärnlöfte "dumpa nu, sortera sen".
+- **Byggt (allt i `index.html`), två features:**
+  1. **Klart-grupp (lättviktig arkivering):** avbockade uppgifter ligger inte längre genomstrukna kvar i listan utan samlas under en hopfällbar "Klart (N)"-rubrik efter ＋uppgift — exakt handlingslistans markerade-grupp-mönster återanvänt (`.donehead`/`.donegroup`). `doneCollapsed` (hopfälld som standard), `toggleDoneCollapse()`, `clearDoneTasks()` (scopar på aktuell vy via `s.cur`/inkorg — rör inte andra projekts klara). Endast uppgifter (idéer "blir inte klara"). Ren presentation → **rör inte Glöd**; avbockning firar som förut. Ägaren valde att ha "Rensa klart" (konsekvent med handlingslistan).
+  2. **Flytta inkorg→projekt:** flytta-ikon (📁) **bara på inkorg-poster** (ägarens val — inte inne i projekt). Ny `openPicker(title,options,onPick)` återanvänder sheet-chromen (`.sheet-bg`/`.sheet`/`closeSheet`) men renderar mål-knappar (`.pickrow`) istället för textfält; `moveItem()` ändrar **bara `projectId`** (typ + delsteg följer med; skiljt från `promote`). Ingen datamodell-ändring, ingen export/import-ändring.
+- **Verifierad i riktig Chrome (CDP, 21 assertions, alla gröna):** avbockning→Klart-grupp (hopfälld default, genomstruken vid expandering, ångra), Rensa-klart-scoping (tömmer bara aktuell vy, lämnar annat projekt orört), **Glöd firar fortf.** vid avbockning, flytta-knapp bara i inkorg (ej i projekt), väljare→flytt sätter `projectId`→posten lämnar inkorgen→överlever reload, + regression (handlingslista add, inline-edit). En första FAIL var testartefakt (delad `doneCollapsed` gjorde att ett extra rubrik-klick fällde ihop gruppen så Rensa-knappen var dold) — åtgärdat i testet, inte appen. `VER` 1.15→1.16, `sw.js` `todonu-v9`→`todonu-v10`. Engångsskriptet raderat.
+
+---
+
 ## 2026-05-30 — Åttonde sessionen (Handlingslista — Keep-liknande checklista)
 
 Ägaren ville ha en **super-simpel, Google Keep-liknande checklista** ("Handlingslista"), placerad under Inkorg på framsidan. Designen togs fram via intervju + en referensbild från ägaren (en Keep-inköpslista).

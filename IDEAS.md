@@ -2,7 +2,7 @@
 
 > Pending idéer och öppna frågor. Läs den här vid sessionsstart. Lägg till nya idéer direkt när de dyker upp. När en idé byggs → flytta till `LOG.md` och uppdatera `STATUS.md`.
 
-**Senast uppdaterad:** 2026-05-30 (inline-redigering överallt, v1.15)
+**Senast uppdaterad:** 2026-05-30 (Klart-grupp + flytta inkorg→projekt, v1.16)
 
 ## Öppna frågor (kräver beslut)
 
@@ -16,6 +16,7 @@
 
 ## Avgjorda / lagda åt sidan
 
+- ~~**Arkivering + flytta inkorg→projekt**~~ — **byggt 2026-05-30 (v1.16).** Diskuterades fram: arkivering = hopfällbar "Klart"-grupp i projekt/inkorg (återanvänt mönster, ingen ny vy); flytta-ikon på inkorg-poster sluter "sortera sen"-loopen. Samtidigt avfärdades **kod-modularisering nu** (premature — spara till synk/Vite-tripwiren) och **deadline/påminnelse/taggar/färgkodning** (krockar med lågpress-själen).
 - ~~**Riktig morgonnotis** (roadmap-punkt 2, steg 2)~~ — **lagd åt sidan 2026-05-30.** In-app-hälsningen räcker enligt ägaren. (Om beslutet ändras: Periodic Background Sync + lokal notis i service worker — ingen backend, funkar på Pixel, men ungefärlig tid och kräver notis-permission. Web push + cron-backend ger exakt tid men väcker arkitektur-tripwiren.)
 
 ## Arkitektur-tripwire (bevaka, inte en idé att bygga nu)
