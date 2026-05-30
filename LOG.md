@@ -4,6 +4,24 @@ Kronologisk logg över vad vi byggt och *varför*. Nyaste överst när nya rader
 
 ---
 
+## 2026-05-30 — Sjätte sessionen (textvisning & rad-design + README)
+
+Ägartest på mobil (skärmdump av projektet "Clara Via app") visade tre konkreta svagheter i hur text och rader renderas: (1) "Gör"- och papperskorgsknappen stal textens bredd → långa idéer wrappade till 6–7 rader, få kort fick plats; (2) långa texter gick inte att överblicka; (3) tryck på text öppnade redigering i ett **enradigt** `<input>` → lång text scrollade bara i sidled. Ägaren ville ha en fix **rakt igenom** (uppgifter, idéer, klara uppgifter *och* delsteg), inte bara idéer.
+
+- **Designbeslut (med ägaren):** lång text → *klampa till 3 rader + "visa mer"* (fler kort syns) framför "visa alltid allt". Åtgärdsknappar → *ikon-kompakt på samma rad* (`→` och liten `🗑`) framför egen rad / "…"-meny.
+- **Byggt (allt i `index.html`):**
+  - **Flerradig redigering:** `openSheet` använder nu `<textarea>` som auto-växer (`growField`, tak 40vh sen scroll). Hela texten syns, ingen sidledsscroll. Enter=Klar, **Shift+Enter**=ny rad. Gäller all redigering (uppgift/idé/delsteg/projektnamn/addHere) eftersom de delar samma sheet.
+  - **Klamp + "visa mer":** titlar och delstegs-titlar får `.clampable.clamp` (`-webkit-line-clamp:3`). "visa mer" renderas `hidden` och avslöjas bara när texten faktiskt svämmar över — mäts i `applyClamps()` (`scrollHeight>clientHeight`) efter varje render. `toggleMore()` fäller ut/ihop via klass-toggle, **ingen omritning** (inget hopp). Tryck på själva texten = redigera, som förut.
+  - **Rad-struktur:** texten ligger nu i ett eget `.icontent`-block (`flex:1`, full bredd); knapparna är `.promote`/`.del` som kompakta 38×38-ikoner (`→` med `title="Gör till uppgift"`). `align-items:flex-start` + linjerade checkboxar/punkter mot första textraden. Snabb-fångst-fältet på hemmet lämnat som `<input>` (autofokus för Gboard-mic, ej redigering av lång befintlig text).
+- **`VER` bumpad 1.8 → 1.9**, `sw.js`-cache `todonu-v2` → `todonu-v3` (tvingar färsk hämtning på installerad PWA).
+- **Städning:** referens-skärmdumpen som råkade committas togs bort ur repot.
+- **README.md** skapad — snabblänk till live-appen (https://saka1980.github.io/ToDoNu/) + kort beskrivning, så man enkelt når sidan från GitHub.
+
+### Kvar / nästa steg
+Oförändrat sedan förra sessionen: morgonnotis väg 2 (Periodic Background Sync) om in-app-hälsningen inte räcker. Teknisk skuld oförändrad (helrendering via `innerHTML`, lokal lagring utan synk) — se `STATUS.md`.
+
+---
+
 ## 2026-05-29 — Femte sessionen (in-app morgonhälsning + STATUS/IDEAS)
 
 Skapade `STATUS.md` + `IDEAS.md` (saknades; globala standarden läser dem vid sessionsstart) och byggde första steget av **morgonsammanfattning** (roadmap-punkt 2).
